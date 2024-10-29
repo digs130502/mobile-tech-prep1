@@ -14,6 +14,11 @@ export default function RootLayout() {
         name="question-volunteer"
         options={{ title: "Question Volunteer" }}
       />
+      <Stack.Screen
+        name="question-creation"
+        options={{ title: "Question Creation" }}
+      />
+      <Stack.Screen name="settings" options={{ title: "Settings" }} />
     </Stack>
   );
 }
