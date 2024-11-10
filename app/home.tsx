@@ -15,6 +15,7 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
+      <Text>Welcome to Mobile Tech Interview Prep!</Text>
       <SafeAreaView style={styles.navigation_bar}>
         <TouchableOpacity
           style={styles.button}
@@ -36,6 +37,8 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   navigation_bar: {
     backgroundColor: "#D9D9D9",

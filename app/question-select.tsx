@@ -15,6 +15,28 @@ export default function Question_Select() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.question}>
+        <Text>Question 1</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.question}>
+        <Text>Question 2</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.question}>
+        <Text>Question 3</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.question}>
+        <Text>Question 4</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.question}>
+        <Text>Question 5</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.question}>
+        <Text>Question 6</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.question}>
+        <Text>Question 7</Text>
+      </TouchableOpacity>
+
       <SafeAreaView style={styles.navigation_bar}>
         <TouchableOpacity
           style={styles.button}
@@ -51,5 +73,15 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     width: 30,
     height: 30,
+  },
+  question: {
+    width: "80%",
+    height: "5%",
+    backgroundColor: "#E9E7E7",
+    borderWidth: 1,
+    borderRadius: 15,
+    marginBottom: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
