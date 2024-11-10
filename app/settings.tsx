@@ -15,6 +15,28 @@ export default function Settings() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Setting 1</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Setting 2</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Setting 3</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Setting 4</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Setting 5</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Setting 6</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Setting 7</Text>
+      </TouchableOpacity>
+
       <SafeAreaView style={styles.navigation_bar}>
         <TouchableOpacity
           style={styles.button}
@@ -36,6 +58,7 @@ export default function Settings() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    alignItems: "center",
   },
   navigation_bar: {
     backgroundColor: "#D9D9D9",
@@ -51,5 +74,15 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     width: 30,
     height: 30,
+  },
+  setting: {
+    width: "80%",
+    height: "5%",
+    backgroundColor: "red",
+    borderWidth: 1,
+    borderRadius: 15,
+    marginBottom: 10,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
