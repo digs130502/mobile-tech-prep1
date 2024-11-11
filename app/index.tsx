@@ -4,12 +4,34 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
 
 export default function Index() {
   const router = useRouter();
+  const [email, setEmail] = useState(''); //Email variable and set up
+  const [password, setPassword] = useState(''); //Password variable and set up
+
+  //Function for logging in
+  const loginTest = () => 
+    {
+    //Testing to see if anything is inputted for email and pass
+    if (!email || !password) {
+      Alert.alert("ERROR", "Please enter both fields: email and password"); //ERROR if both fields are empty
+      return;
+    }
+
+  //Test for comparing login info
+    //Replacing with API call to backend express node which will retrieve info from database
+    if (email == "test@123.com" && password == "password") {
+      router.push("home");
+    } 
+    else {
+      Alert.alert("ERROR", "Invalid email or password"); //ERROR if it doesn't match the test info
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -20,6 +42,8 @@ export default function Index() {
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        value={email}
+        onChangeText={setEmail}
       />
 
       {/* Password TextInput */}
@@ -29,12 +53,14 @@ export default function Index() {
         secureTextEntry
         autoCapitalize="none"
         autoCorrect={false}
+        value={password}
+        onChangeText={setPassword}
       />
 
       {/* Login Button */}
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("home")}
+        onPress={loginTest} //Works based on loginTest function with test email and password
       >
         <Text>Log In</Text>
       </TouchableOpacity>
