@@ -11,25 +11,35 @@ export default function Settings() {
     }
   };
 
+  const handleAccount = () => {
+    router.push("/(account)/account");
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.setting}>
+      <TouchableOpacity style={styles.setting} onPress={handleAccount}>
         <Text>My Account</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.setting}>
-        <Text>Setting 2</Text>
+        <Text>Notification Settings</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.setting}>
-        <Text>Setting 3</Text>
+        <Text>Privacy and Security</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.setting}>
-        <Text>Setting 4</Text>
+        <Text>Display Preferences</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.setting}>
-        <Text>Setting 5</Text>
+        <Text>Language</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.setting}>
-        <Text>Setting 6</Text>
+        <Text>About App</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Help and Support</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.setting}>
+        <Text>Feedback</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.setting} onPress={handleLogout}>
         <Text>Log Out</Text>
@@ -42,6 +52,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    paddingTop: 20,
   },
   navigation_bar: {
     backgroundColor: "#D9D9D9",
@@ -60,7 +71,7 @@ const styles = StyleSheet.create({
   },
   setting: {
     width: "80%",
-    height: "5%",
+    paddingVertical: 15,
     backgroundColor: "#E9E7E7",
     borderWidth: 1,
     borderRadius: 15,
