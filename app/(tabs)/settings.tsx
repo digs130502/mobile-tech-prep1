@@ -1,17 +1,15 @@
-import {
-  TextInput,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  KeyboardAvoidingView,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 
 export default function Settings() {
   const router = useRouter();
+
+  const handleLogout = () => {
+    for (let i = 0; i < 4; i++) {
+      router.back(); // Replaces current screen with login screen
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -33,24 +31,9 @@ export default function Settings() {
       <TouchableOpacity style={styles.setting}>
         <Text>Setting 6</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.setting}>
-        <Text>Setting 7</Text>
+      <TouchableOpacity style={styles.setting} onPress={handleLogout}>
+        <Text>Log Out</Text>
       </TouchableOpacity>
-
-      <SafeAreaView style={styles.navigation_bar}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("home")}
-        ></TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("question-select")}
-        ></TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("settings")}
-        ></TouchableOpacity>
-      </SafeAreaView>
     </View>
   );
 }

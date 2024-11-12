@@ -1,12 +1,4 @@
-import {
-  TextInput,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  KeyboardAvoidingView,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 
@@ -36,21 +28,6 @@ export default function Question_Select() {
       <TouchableOpacity style={styles.question}>
         <Text>Question 7</Text>
       </TouchableOpacity>
-
-      <SafeAreaView style={styles.navigation_bar}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("home")}
-        ></TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("question-select")}
-        ></TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("settings")}
-        ></TouchableOpacity>
-      </SafeAreaView>
     </View>
   );
 }

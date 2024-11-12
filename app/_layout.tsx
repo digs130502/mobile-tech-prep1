@@ -3,8 +3,8 @@ import { Stack } from "expo-router";
 export default function RootLayout() {
   return (
     <Stack>
+      {/* Initial Login and Account Creation Screens */}
       <Stack.Screen name="index" options={{ title: "Login" }} />
-      <Stack.Screen name="home" options={{ title: "Home" }} />
       <Stack.Screen
         name="account-creation"
         options={{ title: "Account Creation" }}
@@ -14,11 +14,9 @@ export default function RootLayout() {
         name="question-volunteer"
         options={{ title: "Question Volunteer" }}
       />
-      <Stack.Screen
-        name="question-creation"
-        options={{ title: "Question Creation" }}
-      />
-      <Stack.Screen name="settings" options={{ title: "Settings" }} />
+
+      {/* Main App Screens with Tabs */}
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
 }

@@ -10,6 +10,10 @@ import { useRouter } from "expo-router";
 
 export default function Question_Volunteer() {
   const router = useRouter();
+
+  const handleSignUp = () => {
+    router.push("/(tabs)/home");
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Question Volunteer</Text>
@@ -30,10 +34,7 @@ export default function Question_Volunteer() {
         autoCapitalize="none"
         autoCorrect={false}
       />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("home")}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <Text>Sign Up</Text>
       </TouchableOpacity>
     </View>

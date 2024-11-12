@@ -6,10 +6,17 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React from "react";
-import { useRouter } from "expo-router";
+import { useRouter } from "expo-router"; // Use useRouter from expo-router
 
 export default function Index() {
   const router = useRouter();
+
+  const handleLogin = () => {
+    router.push("/(tabs)/home"); // pushs to the home screen in the tabs layout
+  };
+  const handleButton = () => {
+    router.push("/account-creation");
+  };
 
   return (
     <View style={styles.container}>
@@ -32,21 +39,15 @@ export default function Index() {
       />
 
       {/* Login Button */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("home")}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text>Log In</Text>
       </TouchableOpacity>
 
-      {/*Or*/}
+      {/* Or */}
       <Text style={styles.or}>Or</Text>
 
       {/* Sign Up Button */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("account-creation")}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleButton}>
         <Text>Sign Up</Text>
       </TouchableOpacity>
     </View>

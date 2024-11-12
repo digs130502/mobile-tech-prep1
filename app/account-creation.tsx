@@ -1,31 +1,27 @@
-import {
-  TextInput,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 
 export default function Account_Creation() {
   const router = useRouter();
 
+  const handleLearner = () => {
+    router.push("/learner");
+  };
+
+  const handleVolunteer = () => {
+    router.push("/question-volunteer");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Account Creation</Text>
       <Text style={styles.subTitle}>Are you:</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("learner")}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleLearner}>
         <Text>Learner</Text>
       </TouchableOpacity>
       <Text style={styles.orText}>Or</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("question-volunteer")}
-      >
+      <TouchableOpacity style={styles.button} onPress={handleVolunteer}>
         <Text>Question Volunteer</Text>
       </TouchableOpacity>
     </View>

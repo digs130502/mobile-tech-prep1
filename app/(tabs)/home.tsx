@@ -1,12 +1,4 @@
-import {
-  TextInput,
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  KeyboardAvoidingView,
-} from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 
@@ -16,20 +8,6 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <Text>Welcome to Mobile Tech Interview Prep!</Text>
-      <SafeAreaView style={styles.navigation_bar}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("home")}
-        ></TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("question-select")}
-        ></TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("settings")}
-        ></TouchableOpacity>
-      </SafeAreaView>
     </View>
   );
 }
