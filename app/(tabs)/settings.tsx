@@ -14,7 +14,7 @@ export default function Settings() {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.setting}>
-        <Text>Setting 1</Text>
+        <Text>My Account</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.setting}>
         <Text>Setting 2</Text>
