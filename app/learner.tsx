@@ -4,15 +4,42 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Alert,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "expo-router";
 
 export default function Learner() {
   const router = useRouter();
+  const [email, setEmail] = useState(''); //Set up email variable
+  const [password, setPassword] = useState(''); //Set up password variable
 
-  const handleSignUp = () => {
-    router.push("/(tabs)/home");
+  //Sign up functionality for Learner
+  const handleSignUp = async () => {
+    try {
+      const response = await fetch("http://10.0.2.2:3000/api/signup", { //Fetch response from the Android Studio origin
+        method: "POST", headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email, password, role: "Learner", //Give email, password, and role (L) as the request body.
+        }),
+      });
+
+      const data = await response.json(); //Wait for response from endpoint
+
+      if (response.ok) {
+        Alert.alert("SUCCESS", "Account created successfully!"); //Success message
+        router.push("/(tabs)/home"); //GO to the home screen.
+      } 
+      else {
+        Alert.alert("ERROR", data.message || "Failed to sign up"); //ERROR message if failed to sign up
+      }
+    } 
+    catch (error) {
+      console.error("ERROR: Could not sign-up:", error); //General Error messages.
+      Alert.alert("ERROR", "Something went wrong. Please attempt again.");
+    }
   };
 
   return (
@@ -25,6 +52,8 @@ export default function Learner() {
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
+        value={email}
+        onChangeText={setEmail}
       />
 
       {/* Password TextInput */}
@@ -34,6 +63,8 @@ export default function Learner() {
         secureTextEntry
         autoCapitalize="none"
         autoCorrect={false}
+        value={password}
+        onChangeText={setPassword}
       />
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
         <Text>Sign Up</Text>
