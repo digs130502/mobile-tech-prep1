@@ -22,7 +22,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost", //your MySQL host name
   user: "root", //your MySQL username
-  password: "Dn05132002.", //your MySQL password
+  password: "", //your MySQL password
   database: "MobileTechPrep", //the name of the Database created
 });
 
