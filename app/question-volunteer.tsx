@@ -11,18 +11,22 @@ import { useRouter } from "expo-router";
 
 export default function Question_Volunteer() {
   const router = useRouter();
-  const [email, setEmail] = useState(''); //Set up email variable
-  const [password, setPassword] = useState(''); //Set up password variable
+  const [email, setEmail] = useState(""); //Set up email variable
+  const [password, setPassword] = useState(""); //Set up password variable
 
   //Sign up functionality for QV
   const handleSignUp = async () => {
     try {
-      const response = await fetch("http://10.0.2.2:3000/api/signup", { //Fetch response from the Android Studio origin
-        method: "POST", headers: {
+      const response = await fetch("http://192.168.1.159:3000/api/signup", {
+        //Fetch response from the Android Studio origin
+        method: "POST",
+        headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email, password, role: "Question Volunteer", //Give email, password, and role (QV) as the request body.
+          email,
+          password,
+          role: "Question Volunteer", //Give email, password, and role (QV) as the request body.
         }),
       });
 
@@ -31,12 +35,10 @@ export default function Question_Volunteer() {
       if (response.ok) {
         Alert.alert("SUCCESS", "Account created successfully!"); //Success message
         router.push("/(tabs)/home"); //GO to the home screen.
-      } 
-      else {
+      } else {
         Alert.alert("ERROR", data.message || "Failed to sign up"); //ERROR message if failed to sign up
       }
-    } 
-    catch (error) {
+    } catch (error) {
       console.error("ERROR: Could not sign-up:", error); //General Error messages.
       Alert.alert("ERROR", "Something went wrong. Please attempt again.");
     }
