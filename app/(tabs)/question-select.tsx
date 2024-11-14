@@ -4,9 +4,11 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Touchable,
 } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
+
 
 export default function Question_Select() {
   const router = useRouter();
@@ -27,6 +29,16 @@ export default function Question_Select() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <TouchableOpacity style={{...styles.question, ...styles.creation}}
+          onPress={() =>
+            router.push({
+              pathname: "/(questions)/create-questions",
+              params:{},
+            })
+          }
+        >
+          <Text style={styles.creationText}>+ Create Question</Text>
+        </TouchableOpacity>
         {questions.map((question, index) => (
           <TouchableOpacity
             key={index}
@@ -56,7 +68,7 @@ const styles = StyleSheet.create({
   },
   question: {
     width: "80%",
-    paddingVertical: 15,
+    padding: 15,
     backgroundColor: "#E9E7E7",
     borderWidth: 1,
     borderRadius: 15,
@@ -64,4 +76,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  creation: {
+    backgroundColor: "#4CAF50",
+    borderColor:"#207339",
+    borderWidth: 3,
+    marginBottom: 30
+  },
+  creationText:{
+    color: "#FFFFFF"
+  }
 });
