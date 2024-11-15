@@ -6,9 +6,7 @@ export default function Settings() {
   const router = useRouter();
 
   const handleLogout = () => {
-    for (let i = 0; i < 4; i++) {
-      router.back(); // Replaces current screen with login screen
-    }
+    router.push('/');
   };
 
   const handleAccount = () => {

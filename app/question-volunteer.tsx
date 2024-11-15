@@ -17,8 +17,9 @@ export default function Question_Volunteer() {
   //Sign up functionality for QV
   const handleSignUp = async () => {
     try {
-      const response = await fetch("http://192.168.1.159:3000/api/signup", {
-        //Fetch response from the Android Studio origin
+      //Replace the x.x with the parts of your IP Address
+      const response = await fetch("http://192.168.x.x:3000/api/signup", {
+        //Fetch response from the origin
         method: "POST",
         headers: {
           "Content-Type": "application/json",

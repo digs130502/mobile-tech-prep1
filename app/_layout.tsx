@@ -4,7 +4,7 @@ export default function RootLayout() {
   return (
     <Stack>
       {/* Initial Login and Account Creation Screens */}
-      <Stack.Screen name="index" options={{ title: "Login" }} />
+      <Stack.Screen name="index" options={{ title: "Login" , headerShown: false, }} />
       <Stack.Screen
         name="account-creation"
         options={{ title: "Account Creation" }}

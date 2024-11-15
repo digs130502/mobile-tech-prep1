@@ -10,7 +10,8 @@ const PORT = 3000; //Specify port
 //CORS for allowing requests
 app.use(
   cors({
-    origin: ["http://192.168.1.159:3000", "http://localhost:8081"], //allow requests from web and Android Studios emulator
+    //Replace the x.x with the parts of your IP Address
+    origin: ["http://192.168.x.x:3000", "http://localhost:8081"], //allow requests
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
