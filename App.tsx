@@ -14,13 +14,16 @@ import MyVolunteerExploreScreen from "./screens/volunteer-home/volunteer-explore
 import MyQuestionCreateScreen from "./screens/volunteer-home/question-creation";
 import MyVolunteerSettingsScreen from "./screens/volunteer-home/volunteer-settings";
 import MyVolunteerEditScreen from "./screens/volunteer-home/volunteer-settings/volunteer-edit";
+import MyCreationScreen from "./screens/volunteer-home/question-create/create";
 import {
   RootStackParamList,
   TabParamList,
   SettingParamList,
   VolunteerTabParamList,
   VolunteerSettingParamList,
+  QuestionCreationParamList,
 } from "./navigation/types";
+import QuestionCreation from "./screens/volunteer-home/question-creation";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const VolunteerTab = createBottomTabNavigator<VolunteerTabParamList>();
@@ -28,6 +31,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const SettingsStack = createStackNavigator<SettingParamList>();
 const VolunteerSettingsStack =
   createStackNavigator<VolunteerSettingParamList>();
+const QuestionCreateStack = createStackNavigator<QuestionCreationParamList>();
 
 function HomeTabs() {
   return (
@@ -49,7 +53,7 @@ function VolunteerHomeTabs() {
       />
       <VolunteerTab.Screen
         name="Question-Create"
-        component={MyQuestionCreateScreen}
+        component={QuestionCreationTab}
         options={{ title: "Create Questions" }}
       />
       <VolunteerTab.Screen
@@ -88,6 +92,19 @@ function VolunteerSettingsTab() {
         options={{ title: "Edit Account" }}
       />
     </VolunteerSettingsStack.Navigator>
+  );
+}
+
+function QuestionCreationTab() {
+  return (
+    <QuestionCreateStack.Navigator>
+      <QuestionCreateStack.Screen
+        name="Question-Create"
+        component={MyQuestionCreateScreen}
+        options={{ headerShown: false }}
+      />
+      <QuestionCreateStack.Screen name="Create" component={MyCreationScreen} />
+    </QuestionCreateStack.Navigator>
   );
 }
 

@@ -31,3 +31,8 @@ export type VolunteerSettingParamList = {
   "Volunteer-Edit": undefined;
   Login: undefined;
 };
+
+export type QuestionCreationParamList = {
+  "Question-Create": undefined;
+  Create: undefined;
+};
