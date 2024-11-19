@@ -25,3 +25,9 @@ export type SettingParamList = {
   Edit: undefined;
   Login: undefined;
 };
+
+export type VolunteerSettingParamList = {
+  "Volunteer-Settings": undefined;
+  "Volunteer-Edit": undefined;
+  Login: undefined;
+};

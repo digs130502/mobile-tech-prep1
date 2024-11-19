@@ -36,7 +36,7 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
 
       if (response.ok) {
         Alert.alert("SUCCESS", "Account created successfully!"); // Success message
-        navigation.navigate("Home");
+        navigation.navigate("Volunteer-Home");
       } else {
         Alert.alert("ERROR", data.message || "Failed to sign up"); // ERROR message if failed to sign up
       }
