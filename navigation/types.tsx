@@ -13,6 +13,12 @@ export type TabParamList = {
   Settings: undefined;
 };
 
+export type VolunteerTabParamList = {
+  "Volunteer-Explore": undefined;
+  "Question-Create": undefined;
+  "Volunteer-Settings": undefined;
+};
+
 export type SettingParamList = {
   Settings: undefined;
   Edit: undefined;

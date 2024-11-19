@@ -10,6 +10,9 @@ import MyExploreScreen from "./screens/home/explore";
 import MyQuestionScreen from "./screens/home/question-select";
 import MySettingsScreen from "./screens/home/settings";
 import MyEditScreen from "./screens/home/account-edit/edit";
+import MyVolunteerExploreScreen from "./screens/volunteer-home/volunteer-explore";
+import MyQuestionCreateScreen from "./screens/volunteer-home/question-creation";
+import MyVolunteerSettingsScreen from "./screens/volunteer-home/volunteer-settings";
 import {
   RootStackParamList,
   TabParamList,
