@@ -108,7 +108,9 @@ app.post("/api/login", async (req, res) => {
         }
 
         //Success message that login was successful.
-        res.status(200).json({ message: "Login successful" });
+        res
+          .status(200)
+          .json({ message: "Login successful", role: user.AccountType });
       }
     );
   } catch (error) {

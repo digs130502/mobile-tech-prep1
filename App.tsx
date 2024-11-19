@@ -17,9 +17,11 @@ import {
   RootStackParamList,
   TabParamList,
   SettingParamList,
+  VolunteerTabParamList,
 } from "./navigation/types";
 
 const Tab = createBottomTabNavigator<TabParamList>();
+const VolunteerTab = createBottomTabNavigator<VolunteerTabParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 const SettingsStack = createStackNavigator<SettingParamList>();
 
@@ -30,6 +32,25 @@ function HomeTabs() {
       <Tab.Screen name="Question-Select" component={MyQuestionScreen} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>
+  );
+}
+
+function VolunteerHomeTabs() {
+  return (
+    <VolunteerTab.Navigator>
+      <VolunteerTab.Screen
+        name="Volunteer-Explore"
+        component={MyVolunteerExploreScreen}
+      />
+      <VolunteerTab.Screen
+        name="Question-Create"
+        component={MyQuestionCreateScreen}
+      />
+      <VolunteerTab.Screen
+        name="Volunteer-Settings"
+        component={MyVolunteerSettingsScreen}
+      />
+    </VolunteerTab.Navigator>
   );
 }
 
@@ -60,6 +81,12 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeTabs}
+          options={{ headerShown: false }}
+        />
+        {/* Volunteer Home Tabs */}
+        <Stack.Screen
+          name="Volunteer-Home"
+          component={VolunteerHomeTabs}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

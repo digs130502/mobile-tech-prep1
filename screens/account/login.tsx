@@ -34,10 +34,19 @@ export default function Login({ navigation }: LoginProps) {
       });
 
       const data = await response.json(); // Wait for response from endpoint
+      console.log("Response: data:", data);
 
       if (response.status === 200) {
-        // Success
-        navigation.navigate("Home"); // Go to the Home screen
+        // Success: Check the role of the account
+        const { role } = data;
+
+        if (role === "Learner") {
+          navigation.navigate("Home"); // Go to the Home screen
+        } else if (role === "Question Volunteer") {
+          navigation.navigate("Volunteer-Home"); // Go to the Volunteer Home screen
+        } else {
+          Alert.alert("Login Failed", "Invalid role specified.");
+        }
       } else if (response.status === 404) {
         // If email is not found
         Alert.alert("Login Failed", "Email not found.");
