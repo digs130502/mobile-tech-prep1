@@ -23,7 +23,6 @@ import {
   VolunteerSettingParamList,
   QuestionCreationParamList,
 } from "./navigation/types";
-import QuestionCreation from "./screens/volunteer-home/question-creation";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const VolunteerTab = createBottomTabNavigator<VolunteerTabParamList>();
