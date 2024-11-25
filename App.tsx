@@ -2,6 +2,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
+import { AppProvider } from "./AppContext";
 import MyLoginScreen from "./screens/account/login";
 import MyAccountScreen from "./screens/account/account-creation";
 import MyLearnerScreen from "./screens/account/learner";
@@ -109,6 +110,7 @@ function QuestionCreationTab() {
 
 export default function App() {
   return (
+    <AppProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Login">
         {/* Login/Signup Stack */}
@@ -131,5 +133,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </AppProvider>
   );
 }

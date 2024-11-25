@@ -9,17 +9,19 @@ import {
 import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
+import { useAppContext } from "../../AppContext";
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, "Learner">;
 
 export default function Learner({ navigation }: LoginProps) {
   const [email, setEmail] = useState(""); // Set up email variable
   const [password, setPassword] = useState(""); // Set up password variable
+  const { setAccountID } = useAppContext();
 
   // Sign up functionality for Learner
   const handleSignUp = async () => {
     try {
-      const response = await fetch("http://192.168.1.159:3000/api/signup", {
+      const response = await fetch("http://192.168.1.233:3000/api/signup", {
         // Fetch response from the Android Studio origin
         method: "POST",
         headers: {
@@ -36,6 +38,8 @@ export default function Learner({ navigation }: LoginProps) {
 
       if (response.ok) {
         Alert.alert("SUCCESS", "Account created successfully!"); // Success message
+        const { accountID } = data;
+        setAccountID(accountID);
         navigation.navigate("Home");
       } else {
         Alert.alert("ERROR", data.message || "Failed to sign up"); // ERROR message if failed to sign up

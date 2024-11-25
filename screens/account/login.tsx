@@ -9,12 +9,14 @@ import {
 import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
+import { useAppContext } from "../../AppContext";
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export default function Login({ navigation }: LoginProps) {
   const [email, setEmail] = useState(""); // Set up email variable
   const [password, setPassword] = useState(""); // Set up password variable
+  const { setAccountID } = useAppContext();
 
   // Login functionality
   const handleLogin = async () => {
@@ -23,7 +25,7 @@ export default function Login({ navigation }: LoginProps) {
       return;
     }
     try {
-      const response = await fetch("http://192.168.1.159:3000/api/login", {
+      const response = await fetch("http://192.168.1.233:3000/api/login", {
         // Fetch response from the Android Studio origin
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,7 +40,8 @@ export default function Login({ navigation }: LoginProps) {
 
       if (response.status === 200) {
         // Success: Check the role of the account
-        const { role } = data;
+        const { accountID, role } = data;
+        setAccountID(accountID);
 
         if (role === "Learner") {
           navigation.navigate("Home"); // Go to the Home screen

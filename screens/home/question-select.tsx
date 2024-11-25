@@ -4,29 +4,47 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
+
+type Question = {
+  QuestionID: number;
+  Question_Text: string;
+};
 
 export default function Question_Select() {
-  const questions = [
-    "Explain the difference between synchronous and asynchronous programming.",
-    "How does JavaScript handle closures, and why are they useful?",
-    "Describe how React's component lifecycle methods work.",
-    "What is the purpose of a database index, and how does it impact performance?",
-    "How would you handle error management in a large application?",
-    "Explain the concept of REST and its common HTTP methods.",
-    "What are Prototypical Networks, and how are they used in few-shot learning?",
-    "Describe the differences between SQL and NoSQL databases.",
-    "How does memory management work in Python?",
-    "Explain Big O notation and why it is important in algorithm analysis.",
-  ];
+  const [questions, setQuestions] = useState<Question[]>([]); // Set the correct type
+
+  // Fetch questions from the backend
+  const fetchQuestions = async () => {
+    try {
+      const response = await fetch("http://192.168.1.233:3000/api/questions");
+      if (!response.ok) {
+        throw new Error("Failed to fetch questions");
+      }
+      const data: Question[] = await response.json(); // Ensure the fetched data matches the Question type
+      setQuestions(data);
+    } catch (error) {
+      console.error("Error fetching questions:", error);
+      Alert.alert("Error", "Failed to load questions. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    fetchQuestions(); // Fetch questions when the component mounts
+  }, []);
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {questions.map((question, index) => (
-          <TouchableOpacity key={index} style={styles.question}>
-            <Text>{question}</Text>
+      {questions.map((question) => (
+          <TouchableOpacity
+            key={question.QuestionID}
+            style={styles.question}
+            onPress={() => Alert.alert("Question Selected", question.Question_Text)}
+          >
+            <Text>{question.Question_Text}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

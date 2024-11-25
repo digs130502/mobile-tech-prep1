@@ -10,7 +10,7 @@ const PORT = 3000; //Specify port
 //CORS for allowing requests
 app.use(
   cors({
-    origin: ["http://192.168.1.159:3000", "http://localhost:8081"], //allow requests from web and Android Studios emulator
+    origin: ["http://192.168.1.233:3000", "http://localhost:8081"], //allow requests from web and Android Studios emulator
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
@@ -22,7 +22,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost", //your MySQL host name
   user: "root", //your MySQL username
-  password: "Dn05132002.", //your MySQL password
+  password: "Aaron2003!", //your MySQL password
   database: "MobileTechPrep", //the name of the Database created
 });
 
@@ -68,7 +68,10 @@ app.post("/api/signup", async (req, res) => {
                 .status(500)
                 .json({ message: "ERROR: Could not insert account" }); //Error message if account can't be inserted
             }
-            res.status(201).json({ message: "Account created successfully" }); //Success message if account is inserted.
+
+            const accountID = result.insertId;
+
+            res.status(201).json({ message: "Account created successfully", accountID }); //Success message if account is inserted.
           }
         );
       }
@@ -110,7 +113,7 @@ app.post("/api/login", async (req, res) => {
         //Success message that login was successful.
         res
           .status(200)
-          .json({ message: "Login successful", role: user.AccountType });
+          .json({ message: "Login successful", accountID: user.AccountID, role: user.AccountType });
       }
     );
   } catch (error) {
@@ -118,6 +121,43 @@ app.post("/api/login", async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
+
+//Endpoint for question-select
+app.get("/api/questions", (req, res) => {
+  db.query("SELECT QuestionID, Question_Text FROM Question", (err, results) => {
+    if (err) {
+      console.error("Error fetching questions:", err);
+      return res.status(500).json({ message: "Error fetching questions" });
+    }
+    res.status(200).json(results);
+  });
+});
+
+// Endpoint to fetch questions created by the logged-in Question Volunteer
+app.get("/api/questions/volunteer", (req, res) => {
+  const accountID = req.query.accountID; // Get the accountID from the query params
+
+  if (!accountID) {
+    return res.status(400).json({ message: "Account ID is required" });
+  }
+
+  // Query to get the questions created by the specific Question Volunteer
+  db.query(
+    "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ?",
+    [accountID], // Bind the accountID to the query
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching volunteer's questions:", err);
+        return res.status(500).json({ message: "Error fetching questions" });
+      }
+
+      res.status(200).json(results); // Send the list of questions
+    }
+  );
+});
+
+
+
 
 //Start Node.js Express server
 app.listen(PORT, () => {

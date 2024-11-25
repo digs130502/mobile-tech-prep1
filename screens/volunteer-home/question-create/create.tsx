@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -11,8 +11,10 @@ import {
   Pressable,
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
+import { useAppContext } from "../../../AppContext";
 
 export default function Create() {
+  const { accountID } = useAppContext();
   const [question, setQuestion] = useState<string>(""); // Explicitly define the type of question
   const [answers, setAnswers] = useState<string[]>([]); // Array of strings for answers
   const [hint, setHint] = useState<string>(""); // Hint is also a string
@@ -44,12 +46,38 @@ export default function Create() {
     setAnswers(newAnswers);
   };
 
-  const handleCreateQuestion = (): void => {
-    alert(
-      `Question Created:\n\n${question}\nAnswers: ${answers.join(
-        ", "
-      )}\nHint: ${hint}`
-    );
+  const handleCreateQuestion = async (): Promise<void> => {
+    if (!question || answers.length === 0 || !accountID) {
+      alert("Please provide a question, answers, and ensure you're logged in.");
+      return;
+    }
+
+    const questionData = {
+      questionText: question,
+      answers: answers,
+      hint: hint,
+      creatorID: accountID, // Pass accountID as creatorID
+    };
+
+    try {
+      const response = await fetch("https://your-api-url.com/api/questions/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(questionData),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Question created successfully!");
+      } else {
+        alert(`Error: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Error creating question:", error);
+      alert("An error occurred while creating the question.");
+    }
   };
 
   const renderSwipeable = ({
