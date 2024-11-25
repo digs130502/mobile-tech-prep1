@@ -125,38 +125,65 @@ app.post("/api/login", async (req, res) => {
 //Endpoint for question-select
 app.get("/api/questions", (req, res) => {
   db.query("SELECT QuestionID, Question_Text FROM Question", (err, results) => {
-    if (err) {
+    if (err) {//ERROR: Did not get questions
       console.error("Error fetching questions:", err);
       return res.status(500).json({ message: "Error fetching questions" });
     }
-    res.status(200).json(results);
+    res.status(200).json(results); //Send result
   });
 });
 
-// Endpoint to fetch questions created by the logged-in Question Volunteer
+//Endpoint to get questions created by the logged in Question Volunteer
 app.get("/api/questions/volunteer", (req, res) => {
-  const accountID = req.query.accountID; // Get the accountID from the query params
+  const accountID = req.query.accountID; //Get the accountID
 
-  if (!accountID) {
+  if (!accountID) {//If no account iD
     return res.status(400).json({ message: "Account ID is required" });
   }
 
-  // Query to get the questions created by the specific Question Volunteer
   db.query(
     "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ?",
-    [accountID], // Bind the accountID to the query
+    [accountID], //Get the questions from creator ID
     (err, results) => {
       if (err) {
         console.error("Error fetching volunteer's questions:", err);
         return res.status(500).json({ message: "Error fetching questions" });
       }
 
-      res.status(200).json(results); // Send the list of questions
+      res.status(200).json(results); //Send the list of questions
     }
   );
 });
 
+//Endpoint for creating a new question
+app.post("/api/questions/create", (req, res) => {
+  //Get all parts of the request body
+  const { question, answers, hint, difficulty, topic, pseudo_q, tsc_q, ds_q, creatorID } = req.body;
 
+  //If certain fields are empty
+  if (!question || !answers || !creatorID) {
+    return res.status(400).json({ message: "Question, answers, and creatorID are required" });
+  }
+
+  //Join answers together
+  const answersText = answers.join(", ");
+
+  //Insert question into the mysql database
+  db.query(
+    "INSERT INTO Question (Difficulty, Topic, Question_Text, DS_Q, Pseudo_Q, TSC_Q, Hints, creatorID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [difficulty, topic, question, answersText, pseudo_q, tsc_q, hint, creatorID],
+    (err, result) => {
+      if (err) { //ERROR: Could not insert
+        console.error("Error inserting question:", err);
+        return res.status(500).json({ message: "Error inserting question" });
+      }
+
+      //Get the ID of the new question
+      const newQuestionID = result.insertId;
+      res.status(201).json({ message: "Question created successfully", questionID: newQuestionID }); //Success message
+    }
+  );
+});
 
 
 //Start Node.js Express server

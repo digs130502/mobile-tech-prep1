@@ -1,22 +1,21 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-// Define the shape of the context data
+//Defining context
 interface AppContextProps {
   accountID: number | null;
   setAccountID: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
-// Define the type for the provider's children
+
 interface AppProviderProps {
-  children: ReactNode;  // This allows the provider to accept children
+  children: ReactNode;
 }
 
-// Create the context
+//Creating the context
 const AppContext = createContext<AppContextProps | undefined>(undefined);
 
-// Create the provider component
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  // State to store the accountID
+  //State to store the accountID
   const [accountID, setAccountID] = useState<number | null>(null);
 
   return (
@@ -26,7 +25,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   );
 };
 
-// Custom hook to use the context in any component
+//Use the context anywhere
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {

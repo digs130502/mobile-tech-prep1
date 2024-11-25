@@ -8,31 +8,32 @@ import {
 } from "react-native";
 import React, { useEffect, useState } from "react";
 
+//Defining what a question holds
 type Question = {
   QuestionID: number;
   Question_Text: string;
 };
 
 export default function Question_Select() {
-  const [questions, setQuestions] = useState<Question[]>([]); // Set the correct type
+  const [questions, setQuestions] = useState<Question[]>([]); //Set question variables
 
-  // Fetch questions from the backend
+  //Function to retrieve questions from the backend
   const fetchQuestions = async () => {
     try {
-      const response = await fetch("http://192.168.1.233:3000/api/questions");
-      if (!response.ok) {
-        throw new Error("Failed to fetch questions");
+      const response = await fetch("http://192.168.x.x:3000/api/questions");
+      if (!response.ok) { //ERROR: could not retrieve questions
+        throw new Error("Failed to retrieve questions");
       }
-      const data: Question[] = await response.json(); // Ensure the fetched data matches the Question type
-      setQuestions(data);
+      const data: Question[] = await response.json(); //Checks if the fetched data matches the Question type
+      setQuestions(data); //Sets the questions
     } catch (error) {
-      console.error("Error fetching questions:", error);
-      Alert.alert("Error", "Failed to load questions. Please try again.");
+      console.error("Error retrieving questions:", error); //General error messages
+      Alert.alert("ERROR. Failed to load questions. Please try again.");
     }
   };
 
   useEffect(() => {
-    fetchQuestions(); // Fetch questions when the component mounts
+    fetchQuestions(); //Retrieve questions if something else happens
   }, []);
 
   return (

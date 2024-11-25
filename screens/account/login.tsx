@@ -9,55 +9,59 @@ import {
 import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../AppContext"; //access account ID
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export default function Login({ navigation }: LoginProps) {
-  const [email, setEmail] = useState(""); // Set up email variable
-  const [password, setPassword] = useState(""); // Set up password variable
-  const { setAccountID } = useAppContext();
+  const [email, setEmail] = useState(""); //Set up email variable
+  const [password, setPassword] = useState(""); //Set up password variable
+  const { setAccountID } = useAppContext(); //access account ID
 
-  // Login functionality
+  //Login functionality
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("ERROR", "Please enter both email and password.");
+    if (!email || !password) {//Check for empty fields
+      Alert.alert("ERROR: Please enter both email and password.");
       return;
     }
     try {
-      const response = await fetch("http://192.168.1.233:3000/api/login", {
-        // Fetch response from the Android Studio origin
+      const response = await fetch("http://192.168.x.x:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
-          password, // Give email and password as the request body.
+          password, //Give email and password as the request body.
         }),
       });
 
-      const data = await response.json(); // Wait for response from endpoint
+      const data = await response.json(); //Wait for response from endpoint
       console.log("Response: data:", data);
 
       if (response.status === 200) {
-        // Success: Check the role of the account
+        //Success set the account ID
         const { accountID, role } = data;
         setAccountID(accountID);
 
         if (role === "Learner") {
-          navigation.navigate("Home"); // Go to the Home screen
-        } else if (role === "Question Volunteer") {
-          navigation.navigate("Volunteer-Home"); // Go to the Volunteer Home screen
-        } else {
+          navigation.navigate("Home"); //Go to the Home screen
+        } 
+        else if (role === "Question Volunteer") {
+          navigation.navigate("Volunteer-Home"); //Go to the Volunteer Home screen
+        } 
+        else {
           Alert.alert("Login Failed", "Invalid role specified.");
         }
-      } else if (response.status === 404) {
-        // If email is not found
+      } 
+      else if (response.status === 404) {
+        //If email is not found
         Alert.alert("Login Failed", "Email not found.");
-      } else if (response.status === 401) {
-        // If password doesn't match hashed password
+      } 
+      else if (response.status === 401) {
+        //If password doesn't match hashed password
         Alert.alert("Login Failed", "Incorrect password");
-      } else {
-        // General error message
+      } 
+      else {
+        //General error message
         Alert.alert("Login Failed", "An unknown error occured");
       }
     } catch (error) {

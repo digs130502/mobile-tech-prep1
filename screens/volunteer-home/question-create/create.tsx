@@ -4,21 +4,34 @@ import {
   Text,
   TextInput,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   FlatList,
   Modal,
   Pressable,
+  Alert,
 } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
-import { useAppContext } from "../../../AppContext";
+import DropDownPicker from "react-native-dropdown-picker";
+import { useAppContext } from "../../../AppContext"; //For accessing accountID
 
 export default function Create() {
-  const { accountID } = useAppContext();
-  const [question, setQuestion] = useState<string>(""); // Explicitly define the type of question
-  const [answers, setAnswers] = useState<string[]>([]); // Array of strings for answers
-  const [hint, setHint] = useState<string>(""); // Hint is also a string
-  const [isModalVisible, setModalVisible] = useState<boolean>(false); // Modal visibility is a boolean
+  const { accountID } = useAppContext(); //access account ID
+  const [question, setQuestion] = useState<string>("");
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [hint, setHint] = useState<string>("");
+  const [difficulty, setDifficulty] = useState<string>("Easy");
+  const [topic, setTopic] = useState<string>("");
+  const [pseudoQ, setPseudoQ] = useState<string>("");
+  const [tscQ, setTscQ] = useState<string>("");
+  const [dsQ, setDsQ] = useState<string>("");
+  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+
+  const [open, setOpen] = useState(false);
+  const [difficultyItems, setDifficultyItems] = useState([
+    { label: "Easy", value: "Easy" },
+    { label: "Medium", value: "Medium" },
+    { label: "Hard", value: "Hard" },
+  ]);
 
   const dataStructurePatterns: string[] = [
     "Array",
@@ -37,7 +50,7 @@ export default function Create() {
     if (answer && !answers.includes(answer)) {
       setAnswers([...answers, answer]);
     }
-    setModalVisible(false); // Close modal after adding
+    setModalVisible(false);
   };
 
   const deleteAnswer = (index: number): void => {
@@ -46,37 +59,40 @@ export default function Create() {
     setAnswers(newAnswers);
   };
 
-  const handleCreateQuestion = async (): Promise<void> => {
-    if (!question || answers.length === 0 || !accountID) {
-      alert("Please provide a question, answers, and ensure you're logged in.");
-      return;
-    }
-
-    const questionData = {
-      questionText: question,
-      answers: answers,
-      hint: hint,
-      creatorID: accountID, // Pass accountID as creatorID
+   //Function to send the questions created by the current question volunteer
+  const handleCreateQuestion = async () => {
+    const newQuestion = {
+      question,
+      answers,
+      hint,
+      difficulty,
+      topic,
+      pseudo_q: pseudoQ,
+      tsc_q: tscQ,
+      ds_q: dsQ,
+      creatorID: accountID,
     };
 
+    //Sending the new question to the backend
     try {
-      const response = await fetch("https://your-api-url.com/api/questions/create", {
+      const response = await fetch("http://192.168.x.x:3000/api/questions/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(questionData),
+        body: JSON.stringify(newQuestion),
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        alert("Question created successfully!");
-      } else {
-        alert(`Error: ${data.message}`);
+      const result = await response.json();
+      if (response.status === 201) { //If successful, then send success message
+        Alert.alert(`Question Created: ${JSON.stringify(result, null, 2)}`);
+      } 
+      else { //ERROR message
+        Alert.alert(`ERROR: ${result.message}`);
       }
     } catch (error) {
-      console.error("Error creating question:", error);
-      alert("An error occurred while creating the question.");
+      console.error("Error when creating a question:", error); //General error messages
+      Alert.alert("An error occurred while creating the question.");
     }
   };
 
@@ -106,85 +122,138 @@ export default function Create() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Question Header */}
-      <Text style={styles.header}>Question</Text>
-      <TextInput
-        style={styles.questionInput}
-        placeholder="Enter question here..."
-        multiline
-        onChangeText={setQuestion}
-        value={question}
-      />
-
-      {/* Answers */}
-      <Text style={styles.header}>Answers</Text>
+    <View style={styles.outerContainer}>
       <FlatList
+        ListHeaderComponent={
+          <View style={styles.centeredContainer}>
+            <Text style={styles.header}>Question</Text>
+            <TextInput
+              style={styles.questionInput}
+              placeholder="Enter question here..."
+              multiline
+              onChangeText={setQuestion}
+              value={question}
+            />
+            <Text style={styles.header}>Difficulty</Text>
+            <DropDownPicker
+              open={open}
+              value={difficulty}
+              items={difficultyItems}
+              setOpen={setOpen}
+              setValue={setDifficulty}
+              setItems={setDifficultyItems}
+              containerStyle={styles.dropdown}
+            />
+            <Text style={styles.header}>Topic</Text>
+            <TextInput
+              style={styles.hintInput}
+              placeholder="Enter topic here..."
+              onChangeText={setTopic}
+              value={topic}
+            />
+            <Text style={styles.header}>Answers</Text>
+          </View>
+        }
         data={answers}
         keyExtractor={(item, index) => index.toString()}
-        renderItem={renderSwipeable} // Pass the render function directly
-      />
-      <View style={styles.addAnswerContainer}>
-        <TouchableOpacity
-          style={styles.addAnswerButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.addAnswerButtonText}>+</Text>
-          <Text style={styles.addAnswerText}>Add Answer</Text>
-        </TouchableOpacity>
-      </View>
+        renderItem={renderSwipeable}
+        ListFooterComponent={
+          <View style={styles.centeredContainer}>
+            <View style={styles.addAnswerContainer}>
+              <TouchableOpacity
+                style={styles.addAnswerButton}
+                onPress={() => setModalVisible(true)}
+              >
+                <Text style={styles.addAnswerButtonText}>+</Text>
+                <Text style={styles.addAnswerText}>Add Answer</Text>
+              </TouchableOpacity>
+            </View>
 
-      {/* Modal for Selecting Answer */}
-      <Modal visible={isModalVisible} transparent={true} animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select an Answer</Text>
-            <ScrollView style={styles.scrollableList}>
-              {dataStructurePatterns.map((pattern) => (
-                <TouchableOpacity
-                  key={pattern}
-                  style={styles.modalItem}
-                  onPress={() => addAnswer(pattern)}
-                >
-                  <Text style={styles.modalItemText}>{pattern}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-            <Pressable
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
+            {/* Modal for Selecting Answer */}
+            <Modal
+              visible={isModalVisible}
+              transparent={true}
+              animationType="slide"
             >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </Pressable>
+              <View style={styles.modalContainer}>
+                <View style={styles.modalContent}>
+                  <Text style={styles.modalTitle}>Select an Answer</Text>
+                  {dataStructurePatterns.map((pattern) => (
+                    <TouchableOpacity
+                      key={pattern}
+                      style={styles.modalItem}
+                      onPress={() => addAnswer(pattern)}
+                    >
+                      <Text style={styles.modalItemText}>{pattern}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  <Pressable
+                    style={styles.closeButton}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </Modal>
+
+            <Text style={styles.header}>Hint</Text>
+            <TextInput
+              style={styles.hintInput}
+              placeholder="Enter hint here..."
+              onChangeText={setHint}
+              value={hint}
+            />
+
+            <Text style={styles.header}>Pseudo Code</Text>
+            <TextInput
+              style={styles.hintInput}
+              placeholder="Enter pseudo code here..."
+              onChangeText={setPseudoQ}
+              value={pseudoQ}
+            />
+
+            <Text style={styles.header}>TSC Question</Text>
+            <TextInput
+              style={styles.hintInput}
+              placeholder="Enter TSC question here..."
+              onChangeText={setTscQ}
+              value={tscQ}
+            />
+
+            <Text style={styles.header}>DS Question</Text>
+            <TextInput
+              style={styles.hintInput}
+              placeholder="Enter DS question here..."
+              onChangeText={setDsQ}
+              value={dsQ}
+            />
+
+            <TouchableOpacity
+              style={styles.createButton}
+              onPress={handleCreateQuestion}
+            >
+              <Text style={styles.createButtonText}>Create Question</Text>
+            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
-
-      {/* Hint */}
-      <Text style={styles.header}>Hint</Text>
-      <TextInput
-        style={styles.hintInput}
-        placeholder="Enter hint here..."
-        onChangeText={setHint}
-        value={hint}
+        }
       />
-
-      {/* Create Question Button */}
-      <TouchableOpacity
-        style={styles.createButton}
-        onPress={handleCreateQuestion}
-      >
-        <Text style={styles.createButtonText}>Create Question</Text>
-      </TouchableOpacity>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  outerContainer: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#f5f5f5",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 10,
+  },
+  centeredContainer: {
+    width: "90%", // Center content with margin on the sides
+    alignSelf: "center",
+    marginBottom: 20,
   },
   header: {
     fontSize: 18,
@@ -209,6 +278,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#007BFF",
     padding: 10,
     borderRadius: 10,
+    width: "80%", // Make the button wider
+    alignSelf: "center", // Center the button horizontally
+    justifyContent: "center", // Center the text inside the button
   },
   addAnswerButtonText: {
     color: "#fff",
@@ -259,10 +331,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
-  scrollableList: {
-    width: "100%",
-    marginBottom: 20,
-  },
   modalItem: {
     padding: 15,
     borderBottomWidth: 1,
@@ -275,6 +343,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#007BFF",
     padding: 10,
     borderRadius: 10,
+    width: "80%", // Make the button wider
+    alignSelf: "center", // Center the button horizontally
+    alignItems: "center",
   },
   closeButtonText: {
     color: "#fff",
@@ -293,10 +364,16 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
+    width: "80%", // Make the button wider
+    alignSelf: "center", // Center the button horizontally
   },
   createButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  dropdown: {
+    height: 50,
+    marginBottom: 20,
   },
 });

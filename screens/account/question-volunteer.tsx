@@ -9,20 +9,19 @@ import {
 import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
-import { useAppContext } from "../../AppContext";
+import { useAppContext } from "../../AppContext"; //access account ID
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, "Volunteer">;
 
 export default function Question_Volunteer({ navigation }: LoginProps) {
-  const [email, setEmail] = useState(""); // Set up email variable
-  const [password, setPassword] = useState(""); // Set up password variable
-  const { setAccountID } = useAppContext();
+  const [email, setEmail] = useState(""); //Set up email variable
+  const [password, setPassword] = useState(""); //Set up password variable
+  const { setAccountID } = useAppContext(); //access account ID
 
-  // Sign up functionality for Question Volunteer
+  //Sign up functionality for Question Volunteer
   const handleSignUp = async () => {
     try {
-      const response = await fetch("http://192.168.1.233:3000/api/signup", {
-        // Fetch response from the Android Studio origin
+      const response = await fetch("http://192.168.x.x:3000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,19 +29,20 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
         body: JSON.stringify({
           email,
           password,
-          role: "Question Volunteer", // Give email, password, and role (L) as the request body.
+          role: "Question Volunteer", //Give email, password, and role as the request body.
         }),
       });
 
-      const data = await response.json(); // Wait for response from endpoint
+      const data = await response.json(); //Wait for response from endpoint
 
       if (response.ok) {
-        Alert.alert("SUCCESS", "Account created successfully!"); // Success message
+        Alert.alert("SUCCESS", "Account created successfully!"); //Success message
         const { accountID } = data;
-        setAccountID(accountID);
-        navigation.navigate("Volunteer-Home");
-      } else {
-        Alert.alert("ERROR", data.message || "Failed to sign up"); // ERROR message if failed to sign up
+        setAccountID(accountID); //Set the account ID
+        navigation.navigate("Volunteer-Home"); //Go to volunteer home page
+      } 
+      else {
+        Alert.alert("ERROR: Failed to sign up!"); //ERROR message if failed to sign up
       }
     } catch (error) {
       console.error("ERROR: Could not sign-up", error); //General Error messages.

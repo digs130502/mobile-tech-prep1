@@ -9,46 +9,47 @@ import {
 import React, { useState, useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { QuestionCreationParamList } from "../../navigation/types";
-import { useAppContext } from "../../AppContext"; // For accessing accountID
+import { useAppContext } from "../../AppContext"; //For accessing accountID
 
 type CreationProp = NativeStackScreenProps<
   QuestionCreationParamList,
   "Question-Create"
 >;
 
-// Define the Question type
+//Defining the Question type
 interface Question {
   QuestionID: number;
   Question_Text: string;
 }
 
 export default function QuestionCreation({ navigation }: CreationProp) {
-  const [questions, setQuestions] = useState<Question[]>([]); // State to hold the questions
-  const { accountID } = useAppContext();
+  const [questions, setQuestions] = useState<Question[]>([]); //State to hold the questions
+  const { accountID } = useAppContext(); //accesa account ID
 
-  // Fetch the questions created by the current question volunteer
+  //Function to retrieve the questions created by the current question volunteer
   const fetchQuestions = async () => {
     if (!accountID) {
-      Alert.alert("Error", "No accountID found. Please log in again.");
+      Alert.alert("ERROR: No account ID found. Try logging in again."); //Error message if account ID is not found
       return;
     }
 
     try {
-      const response = await fetch(`http://192.168.1.233:3000/api/questions/volunteer?accountID=${accountID}`);
-      const data = await response.json();
+      const response = await fetch(`http://192.168.x.x:3000/api/questions/volunteer?accountID=${accountID}`);
+      const data = await response.json(); //get response
 
       if (response.ok) {
-        setQuestions(data); // Set the questions in state
-      } else {
-        Alert.alert("Error", data.message || "Failed to fetch questions");
+        setQuestions(data); //Set the questions if successful
+      } 
+      else {
+        Alert.alert("ERROR. Failed to get questions."); //Error message if questions could not be retrieved.
       }
     } catch (error) {
-      console.error("Error fetching volunteer's questions:", error);
-      Alert.alert("Error", "Something went wrong while fetching questions.");
+      console.error("Error retrieving question volunteer's questions:", error); //General error messages
+      Alert.alert("ERROR", "Something went wrong while fetching questions.");
     }
   };
 
-  // Fetch questions when the component mounts or when accountID changes
+  //Retrieve questions if accountID changes.
   useEffect(() => {
     fetchQuestions();
   }, [accountID]);
