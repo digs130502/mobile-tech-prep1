@@ -10,7 +10,7 @@ const PORT = 3000; //Specify port
 //CORS for allowing requests
 app.use(
   cors({
-    origin: ["http://192.168.1.233:3000", "http://localhost:8081"], //allow requests from web and Android Studios emulator
+    origin: ["http://192.168.x.x:3000", "http://localhost:8081"], //allow requests from web and Android Studios emulator
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
@@ -22,7 +22,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost", //your MySQL host name
   user: "root", //your MySQL username
-  password: "Aaron2003!", //your MySQL password
+  password: "", //your MySQL password
   database: "MobileTechPrep", //the name of the Database created
 });
 
