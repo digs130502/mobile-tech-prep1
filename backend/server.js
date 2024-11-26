@@ -40,14 +40,9 @@ app.post("/api/signup", async (req, res) => {
   const { email, password, role } = req.body; //get email, password, and role from the request
   try {
     //Check if email already exists in database
-    db.query(
-      "SELECT * FROM Account WHERE Email = ?",
-      [email],
-      async (err, results) => {
+    db.query("SELECT * FROM Account WHERE Email = ?", [email], async (err, results) => {
         if (err) {
-          return res
-            .status(500)
-            .json({ message: "ERROR: Database query incorrect" }); //Error message if query goes wrong
+          return res.status(500).json({ message: "ERROR: Database query incorrect" }); //Error message if query goes wrong
         }
 
         //Checks if email is in database
@@ -59,14 +54,9 @@ app.post("/api/signup", async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         //Insert the new account into the Account table
-        db.query(
-          "INSERT INTO Account (Email, Pass, AccountType) VALUES (?, ?, ?)",
-          [email, hashedPassword, role],
-          (err, result) => {
+        db.query("INSERT INTO Account (Email, Pass, AccountType) VALUES (?, ?, ?)", [email, hashedPassword, role], (err, result) => {
             if (err) {
-              return res
-                .status(500)
-                .json({ message: "ERROR: Could not insert account" }); //Error message if account can't be inserted
+              return res.status(500).json({ message: "ERROR: Could not insert account" }); //Error message if account can't be inserted
             }
 
             const accountID = result.insertId;
@@ -87,14 +77,9 @@ app.post("/api/login", async (req, res) => {
   const { email, password } = req.body; //get email and password from the request
   try {
     //Check if the account (email) exists in database.
-    db.query(
-      "SELECT * FROM Account WHERE Email = ?",
-      [email],
-      async (err, results) => {
+    db.query("SELECT * FROM Account WHERE Email = ?", [email], async (err, results) => {
         if (err) {
-          return res
-            .status(500)
-            .json({ message: "ERROR: Database query incorrect" }); //Error message if query goes wrong
+          return res.status(500).json({ message: "ERROR: Database query incorrect" }); //Error message if query goes wrong
         }
 
         //Email is not found in the database.
@@ -111,9 +96,7 @@ app.post("/api/login", async (req, res) => {
         }
 
         //Success message that login was successful.
-        res
-          .status(200)
-          .json({ message: "Login successful", accountID: user.AccountID, role: user.AccountType });
+        res.status(200).json({ message: "Login successful", accountID: user.AccountID, role: user.AccountType });
       }
     );
   } catch (error) {
@@ -141,9 +124,7 @@ app.get("/api/questions/volunteer", (req, res) => {
     return res.status(400).json({ message: "Account ID is required" });
   }
 
-  db.query(
-    "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ?",
-    [accountID], //Get the questions from creator ID
+  db.query("SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ?", [accountID], //Get the questions from creator ID
     (err, results) => {
       if (err) {
         console.error("Error fetching volunteer's questions:", err);
@@ -169,10 +150,7 @@ app.post("/api/questions/create", (req, res) => {
   const answersText = answers.join(", ");
 
   //Insert question into the mysql database
-  db.query(
-    "INSERT INTO Question (Difficulty, Topic, Question_Text, DS_Q, Pseudo_Q, TSC_Q, Hints, creatorID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [difficulty, topic, question, answersText, pseudo_q, tsc_q, hint, creatorID],
-    (err, result) => {
+  db.query("INSERT INTO Question (Difficulty, Topic, Question_Text, DS_Q, Pseudo_Q, TSC_Q, Hints, creatorID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [difficulty, topic, question, answersText, pseudo_q, tsc_q, hint, creatorID], (err, result) => {
       if (err) { //ERROR: Could not insert
         console.error("Error inserting question:", err);
         return res.status(500).json({ message: "Error inserting question" });

@@ -6,10 +6,11 @@ import {
   StyleSheet,
   Alert
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { QuestionCreationParamList } from "../../navigation/types";
 import { useAppContext } from "../../AppContext"; //For accessing accountID
+import { useFocusEffect } from "@react-navigation/native"; //To fetch questions when navigating back to this page
 
 type CreationProp = NativeStackScreenProps<
   QuestionCreationParamList,
@@ -27,7 +28,7 @@ export default function QuestionCreation({ navigation }: CreationProp) {
   const { accountID } = useAppContext(); //accesa account ID
 
   //Function to retrieve the questions created by the current question volunteer
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     if (!accountID) {
       Alert.alert("ERROR: No account ID found. Try logging in again."); //Error message if account ID is not found
       return;
@@ -45,14 +46,16 @@ export default function QuestionCreation({ navigation }: CreationProp) {
       }
     } catch (error) {
       console.error("Error retrieving question volunteer's questions:", error); //General error messages
-      Alert.alert("ERROR", "Something went wrong while fetching questions.");
+      Alert.alert("ERROR Something went wrong while fetching questions.");
     }
-  };
+  } , [accountID]);
 
-  //Retrieve questions if accountID changes.
-  useEffect(() => {
-    fetchQuestions();
-  }, [accountID]);
+  //Calling fetchQuestions function when navigating back to this page.
+  useFocusEffect(
+    useCallback(() => {
+      fetchQuestions();
+    }, [fetchQuestions, accountID])
+  );
 
   return (
     <View style={styles.container}>

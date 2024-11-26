@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -62,33 +62,24 @@ export default function Create() {
    //Function to send the questions created by the current question volunteer
   const handleCreateQuestion = async () => {
     const newQuestion = {
-      question,
-      answers,
-      hint,
-      difficulty,
-      topic,
-      pseudo_q: pseudoQ,
-      tsc_q: tscQ,
-      ds_q: dsQ,
-      creatorID: accountID,
+      question, answers, hint, difficulty, topic, pseudo_q: pseudoQ, tsc_q: tscQ, ds_q: dsQ, creatorID: accountID,
     };
 
     //Sending the new question to the backend
     try {
       const response = await fetch("http://192.168.x.x:3000/api/questions/create", {
-        method: "POST",
-        headers: {
+        method: "POST", headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newQuestion),
+        }, body: JSON.stringify(newQuestion),
       });
 
       const result = await response.json();
+
       if (response.status === 201) { //If successful, then send success message
-        Alert.alert(`Question Created: ${JSON.stringify(result, null, 2)}`);
+        Alert.alert("Question successfully created");
       } 
       else { //ERROR message
-        Alert.alert(`ERROR: ${result.message}`);
+        Alert.alert("ERROR. Could not create question.");
       }
     } catch (error) {
       console.error("Error when creating a question:", error); //General error messages

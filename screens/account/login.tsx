@@ -26,15 +26,12 @@ export default function Login({ navigation }: LoginProps) {
     }
     try {
       const response = await fetch("http://192.168.x.x:3000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          password, //Give email and password as the request body.
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password, //Give email and password as the request body.
         }),
       });
 
       const data = await response.json(); //Wait for response from endpoint
+
       console.log("Response: data:", data);
 
       if (response.status === 200) {
@@ -65,7 +62,7 @@ export default function Login({ navigation }: LoginProps) {
         Alert.alert("Login Failed", "An unknown error occured");
       }
     } catch (error) {
-      Alert.alert("ERROR", "Something went wrong, Please attempt again."); // General error message
+      Alert.alert("ERROR. Something went wrong, Please attempt again."); // General error message
       console.error("Login Error:", error);
     }
   };

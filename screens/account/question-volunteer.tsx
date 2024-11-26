@@ -22,14 +22,9 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
   const handleSignUp = async () => {
     try {
       const response = await fetch("http://192.168.x.x:3000/api/signup", {
-        method: "POST",
-        headers: {
+        method: "POST", headers: {
           "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          role: "Question Volunteer", //Give email, password, and role as the request body.
+        }, body: JSON.stringify({ email, password, role: "Question Volunteer", //Give email, password, and role as the request body.
         }),
       });
 
@@ -46,7 +41,7 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
       }
     } catch (error) {
       console.error("ERROR: Could not sign-up", error); //General Error messages.
-      Alert.alert("ERROR", "Something went wrong. Please attempt again.");
+      Alert.alert("ERROR. Something went wrong. Please attempt again.");
     }
   };
 
