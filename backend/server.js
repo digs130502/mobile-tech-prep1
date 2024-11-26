@@ -10,8 +10,7 @@ const PORT = 3000; //Specify port
 //CORS for allowing requests
 app.use(
   cors({
-    //Replace the x.x with the parts of your IP Address
-    origin: ["http://192.168.x.x:3000", "http://localhost:8081"], //allow requests
+    origin: ["http://192.168.1.159:3000", "http://localhost:8081"], //allow requests from web and Android Studios emulator
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
@@ -23,7 +22,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost", //your MySQL host name
   user: "root", //your MySQL username
-  password: "", //your MySQL password
+  password: "Dn05132002.", //your MySQL password
   database: "MobileTechPrep", //the name of the Database created
 });
 
@@ -69,7 +68,12 @@ app.post("/api/signup", async (req, res) => {
                 .status(500)
                 .json({ message: "ERROR: Could not insert account" }); //Error message if account can't be inserted
             }
-            res.status(201).json({ message: "Account created successfully" }); //Success message if account is inserted.
+
+            const accountID = result.insertId;
+
+            res
+              .status(201)
+              .json({ message: "Account created successfully", accountID }); //Success message if account is inserted.
           }
         );
       }
@@ -109,13 +113,107 @@ app.post("/api/login", async (req, res) => {
         }
 
         //Success message that login was successful.
-        res.status(200).json({ message: "Login successful" });
+        res.status(200).json({
+          message: "Login successful",
+          accountID: user.AccountID,
+          role: user.AccountType,
+        });
       }
     );
   } catch (error) {
     console.error("ERROR: Could not sign-up:", error); //General error messages
     res.status(500).json({ message: "Server Error" });
   }
+});
+
+//Endpoint for question-select
+app.get("/api/questions", (req, res) => {
+  db.query("SELECT QuestionID, Question_Text FROM Question", (err, results) => {
+    if (err) {
+      //ERROR: Did not get questions
+      console.error("Error fetching questions:", err);
+      return res.status(500).json({ message: "Error fetching questions" });
+    }
+    res.status(200).json(results); //Send result
+  });
+});
+
+//Endpoint to get questions created by the logged in Question Volunteer
+app.get("/api/questions/volunteer", (req, res) => {
+  const accountID = req.query.accountID; //Get the accountID
+
+  if (!accountID) {
+    //If no account iD
+    return res.status(400).json({ message: "Account ID is required" });
+  }
+
+  db.query(
+    "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ?",
+    [accountID], //Get the questions from creator ID
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching volunteer's questions:", err);
+        return res.status(500).json({ message: "Error fetching questions" });
+      }
+
+      res.status(200).json(results); //Send the list of questions
+    }
+  );
+});
+
+//Endpoint for creating a new question
+app.post("/api/questions/create", (req, res) => {
+  //Get all parts of the request body
+  const {
+    question,
+    answers,
+    hint,
+    difficulty,
+    topic,
+    pseudo_q,
+    tsc_q,
+    ds_q,
+    creatorID,
+  } = req.body;
+
+  //If certain fields are empty
+  if (!question || !answers || !creatorID) {
+    return res
+      .status(400)
+      .json({ message: "Question, answers, and creatorID are required" });
+  }
+
+  //Join answers together
+  const answersText = answers.join(", ");
+
+  //Insert question into the mysql database
+  db.query(
+    "INSERT INTO Question (Difficulty, Topic, Question_Text, DS_Q, Pseudo_Q, TSC_Q, Hints, creatorID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [
+      difficulty,
+      topic,
+      question,
+      answersText,
+      pseudo_q,
+      tsc_q,
+      hint,
+      creatorID,
+    ],
+    (err, result) => {
+      if (err) {
+        //ERROR: Could not insert
+        console.error("Error inserting question:", err);
+        return res.status(500).json({ message: "Error inserting question" });
+      }
+
+      //Get the ID of the new question
+      const newQuestionID = result.insertId;
+      res.status(201).json({
+        message: "Question created successfully",
+        questionID: newQuestionID,
+      }); //Success message
+    }
+  );
 });
 
 //Start Node.js Express server
