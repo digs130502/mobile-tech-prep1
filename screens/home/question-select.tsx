@@ -20,7 +20,7 @@ export default function Question_Select() {
   //Function to retrieve questions from the backend
   const fetchQuestions = async () => {
     try {
-      const response = await fetch("http://192.168.1.159:3000/api/questions");
+      const response = await fetch("http://192.168.x.x:3000/api/questions");
       if (!response.ok) {
         //ERROR: could not retrieve questions
         throw new Error("Failed to retrieve questions");
