@@ -1,7 +1,7 @@
-import { StyleSheet, View, Text, } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, } from "react-native";
 import React from "react";
 import {useEffect} from 'react';
-import { Row, Col, Card, Container} from "react-bootstrap";
+import { Row, Col, Card, Container, Button} from "react-bootstrap";
 import { useRouter, useLocalSearchParams, useNavigation } from "expo-router";
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -15,12 +15,15 @@ export default function QuestionSolveScreen() {
     "ANS3",
     "ANS4"
   ]
-  const correctAns = answers[0];
-  
+  let correctAns = answers[0];
+  const [revealed, setRevealed] = React.useState(false);  
+
+
   navigation.setOptions({
     headerTitle: "", // Hides the title
     headerBackVisible: true, // Shows the back button
   });
+
 
   function shuffle() {
     let currentIndex = answers.length;
@@ -38,10 +41,40 @@ export default function QuestionSolveScreen() {
     }
   }
 
+  
 
-useEffect( ()=>{
+  useEffect( ()=>{
+  shuffle();
+  },[]);
+
+function revealMe(ansType:string){
+
+  if(revealed)
+  switch (ansType){
+    case "correct":
+      return{...styles.correct};
+    default:
+      return{...styles.incorrect};
+  }
+
+}
+
+function Answer(correct:boolean){
+  if(revealed == true){
+    if(correct == true){
+        return styles.correct
+    }else{
+      return styles.incorrect
+    }
+ }else{
+  return styles.answerBox
+ }
+}
+
 shuffle();
-},[]);
+
+
+
 
   return (
     <View style={styles.container}>
@@ -51,21 +84,40 @@ shuffle();
         </ScrollView>
       </View>
       <View>
-        <Container>
             <Row xs={2}>
               {answers.map((item, i)=> (
-                  <View style={{...styles.answerBox}}>
-                    <Text  key={"item-"+i}>{item}</Text>
+                  <View style={Answer((item == correctAns)? true : false)}
+                  key={{item} + "-" + i}>
+                    <TouchableOpacity 
+                    onPress={() => setRevealed(true)}
+                    >
+                      {item}
+                    </TouchableOpacity>
                   </View>
             ))}
           </Row>
-        </Container>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  correct:{
+    display: "flex",
+    borderRadius:12,
+    borderWidth: 1,
+    backgroundColor: "#20F020",
+    padding:5,
+    margin:25,
+  },
+  incorrect:{
+    display: "flex",
+    borderRadius:12,
+    borderWidth: 1,
+    backgroundColor: "#F02020",
+    padding:5,
+    margin:25,
+  },
   container: {
     flex: 1,
     justifyContent: "center",
