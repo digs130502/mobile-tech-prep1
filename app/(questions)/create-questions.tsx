@@ -94,7 +94,7 @@ export default function HomeScreen() {
         <Text style={styles.header}>Answers</Text>
           <View>
 
-          {/*create a <ul> element for each item in array*/}
+          {/*create a View element for each item in array*/}
           {answerList.map((item, i)=>(
             <View key={"ans-"+i} style={styles.answer}>
               
