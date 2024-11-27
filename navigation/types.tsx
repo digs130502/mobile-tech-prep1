@@ -36,3 +36,8 @@ export type QuestionCreationParamList = {
   "Question-Create": undefined;
   Create: undefined;
 };
+
+export type QuestionSelectionParamList = {
+  "Question-Select": undefined;
+  "Question-Solve": { question: string }; // Add parameter here
+};

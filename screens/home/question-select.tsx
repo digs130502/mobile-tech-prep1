@@ -7,34 +7,40 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { QuestionSelectionParamList } from "../../navigation/types";
 
-//Defining what a question holds
+type QuestionSelectProp = NativeStackNavigationProp<
+  QuestionSelectionParamList,
+  "Question-Select"
+>;
+
 type Question = {
   QuestionID: number;
   Question_Text: string;
 };
 
 export default function Question_Select() {
-  const [questions, setQuestions] = useState<Question[]>([]); //Set question variables
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const navigation = useNavigation<QuestionSelectProp>();
 
-  //Function to retrieve questions from the backend
   const fetchQuestions = async () => {
     try {
       const response = await fetch("http://192.168.x.x:3000/api/questions");
       if (!response.ok) {
-        //ERROR: could not retrieve questions
         throw new Error("Failed to retrieve questions");
       }
-      const data: Question[] = await response.json(); //Checks if the fetched data matches the Question type
-      setQuestions(data); //Sets the questions
+      const data: Question[] = await response.json();
+      setQuestions(data);
     } catch (error) {
-      console.error("Error retrieving questions:", error); //General error messages
+      console.error("Error retrieving questions:", error);
       Alert.alert("ERROR. Failed to load questions. Please try again.");
     }
   };
 
   useEffect(() => {
-    fetchQuestions(); //Retrieve questions if something else happens
+    fetchQuestions();
   }, []);
 
   return (
@@ -45,7 +51,9 @@ export default function Question_Select() {
             key={question.QuestionID}
             style={styles.question}
             onPress={() =>
-              Alert.alert("Question Selected", question.Question_Text)
+              navigation.navigate("Question-Solve", {
+                question: question.Question_Text,
+              })
             }
           >
             <Text>{question.Question_Text}</Text>

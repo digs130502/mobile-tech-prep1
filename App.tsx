@@ -16,6 +16,7 @@ import MyQuestionCreateScreen from "./screens/volunteer-home/question-creation";
 import MyVolunteerSettingsScreen from "./screens/volunteer-home/volunteer-settings";
 import MyVolunteerEditScreen from "./screens/volunteer-home/volunteer-settings/volunteer-edit";
 import MyCreationScreen from "./screens/volunteer-home/question-create/create";
+import MyQuestionSolvingScreen from "./screens/home/questions/question-solve";
 import {
   RootStackParamList,
   TabParamList,
@@ -23,6 +24,7 @@ import {
   VolunteerTabParamList,
   VolunteerSettingParamList,
   QuestionCreationParamList,
+  QuestionSelectionParamList,
 } from "./navigation/types";
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -32,12 +34,14 @@ const SettingsStack = createStackNavigator<SettingParamList>();
 const VolunteerSettingsStack =
   createStackNavigator<VolunteerSettingParamList>();
 const QuestionCreateStack = createStackNavigator<QuestionCreationParamList>();
+const QuestionSelectionStack =
+  createStackNavigator<QuestionSelectionParamList>();
 
 function HomeTabs() {
   return (
     <Tab.Navigator>
       <Tab.Screen name="Explore" component={MyExploreScreen} />
-      <Tab.Screen name="Question-Select" component={MyQuestionScreen} />
+      <Tab.Screen name="Question-Select" component={QuestionSelectionTab} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>
   );
@@ -108,31 +112,47 @@ function QuestionCreationTab() {
   );
 }
 
+function QuestionSelectionTab() {
+  return (
+    <QuestionSelectionStack.Navigator>
+      <QuestionSelectionStack.Screen
+        name="Question-Select"
+        component={MyQuestionScreen}
+        options={{ headerShown: false }}
+      />
+      <QuestionSelectionStack.Screen
+        name="Question-Solve"
+        component={MyQuestionSolvingScreen}
+      />
+    </QuestionSelectionStack.Navigator>
+  );
+}
+
 export default function App() {
   return (
     <AppProvider>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        {/* Login/Signup Stack */}
-        <Stack.Screen name="Login" component={MyLoginScreen} />
-        <Stack.Screen name="Account" component={MyAccountScreen} />
-        <Stack.Screen name="Learner" component={MyLearnerScreen} />
-        <Stack.Screen name="Volunteer" component={MyVolunteerScreen} />
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          {/* Login/Signup Stack */}
+          <Stack.Screen name="Login" component={MyLoginScreen} />
+          <Stack.Screen name="Account" component={MyAccountScreen} />
+          <Stack.Screen name="Learner" component={MyLearnerScreen} />
+          <Stack.Screen name="Volunteer" component={MyVolunteerScreen} />
 
-        {/* Home Tabs */}
-        <Stack.Screen
-          name="Home"
-          component={HomeTabs}
-          options={{ headerShown: false }}
-        />
-        {/* Volunteer Home Tabs */}
-        <Stack.Screen
-          name="Volunteer-Home"
-          component={VolunteerHomeTabs}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+          {/* Home Tabs */}
+          <Stack.Screen
+            name="Home"
+            component={HomeTabs}
+            options={{ headerShown: false }}
+          />
+          {/* Volunteer Home Tabs */}
+          <Stack.Screen
+            name="Volunteer-Home"
+            component={VolunteerHomeTabs}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     </AppProvider>
   );
 }
