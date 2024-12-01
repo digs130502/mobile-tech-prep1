@@ -29,22 +29,34 @@ CREATE TABLE Question (
     FOREIGN KEY (creatorID) REFERENCES Account(AccountID)
 );
 
--- 3. Create the User Question History Database with foreign key referencing Question table
+-- 3. Create the User Question History Database
 CREATE TABLE User_Question_History (
+    AccountID INT NOT NULL,
     QuestionID INT NOT NULL,
     Difficulty VARCHAR(50),
     Topic VARCHAR(100),
+    Attempts INT DEFAULT 0,
+    Correct_Attempts INT DEFAULT 0,
+    Incorrect_Attempts INT DEFAULT 0,
     Last_Attempted TIMESTAMP,
     LastAttemptPASSFAIL BOOLEAN,
-    PRIMARY KEY (QuestionID),
+    PRIMARY KEY (AccountID, QuestionID),
+    FOREIGN KEY (AccountID) REFERENCES Account(AccountID),
     FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID)
 );
+
+-- Insert two example accounts into the Account table
+
+INSERT INTO Account (Email, Pass, AccountType)
+VALUES 
+    ('example1@gmail.com', 'pass1', 'QuestionVolunteer'),
+    ('example2@yahoo.com', 'pass2', 'QuestionVolunteer');
 
 -- Inserting 10 additional questions into the Question database with consistent column values
 
 INSERT INTO Question (QuestionID, Difficulty, Topic, Question_Text, DS_Q, Pseudo_Q, TSC_Q, Hints, creatorID)
 VALUES 
-    (6, 
+    (1, 
      'Easy', 
      'Arrays', 
      'Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
@@ -70,7 +82,7 @@ Output: [0,1]',
      'O(n),O(n^2),O(log n),O(1)',  
      'Consider an efficient lookup structure', 1), 
 
-    (7, 
+    (2, 
      'Easy', 
      'Linked Lists', 
      'Reverse a singly linked list.
@@ -89,7 +101,7 @@ Constraints:
      'O(n),O(n^2),O(log n)', 
      'Consider updating each node’s next pointer', 1), 
 
-    (8, 
+    (3, 
      'Medium', 
      'Hashing', 
      'Find the first non-repeating character in a string.
@@ -111,7 +123,7 @@ Constraints:
      'O(n),O(n^2),O(log n)', 
      'Try storing character counts as you traverse the string', 1), 
 
-    (9, 
+    (4, 
      'Hard', 
      'Graphs', 
      'Detect a cycle in an undirected graph.
@@ -132,7 +144,7 @@ Constraints:
      'O(V+E),O(V^2),O(V log V)', 
      'Think about marking nodes during traversal', 1), 
 
-    (10, 
+    (5, 
      'Easy', 
      'Arrays', 
      'Find the maximum subarray sum.
@@ -152,7 +164,7 @@ Constraints:
      'O(n),O(n^2),O(log n)', 
      'Consider a running total that resets when negative', 1), 
 
-    (11, 
+    (6, 
      'Medium', 
      'Binary Trees', 
      'Check if a binary tree is a valid binary search tree (BST).
@@ -173,7 +185,7 @@ Constraints:
      'O(n),O(n^2),O(log n)', 
      'An in-order traversal can be helpful here', 2), 
 
-    (12, 
+    (7, 
      'Medium', 
      'Dynamic Programming', 
      'Solve the coin change problem.
@@ -193,7 +205,7 @@ Constraints:
      'O(n*m),O(2^n),O(n log n)', 
      'Think about storing solutions to subproblems', 2), 
 
-    (13, 
+    (8, 
      'Easy', 
      'Strings', 
      'Determine if a string is a palindrome.
@@ -214,7 +226,7 @@ Constraints:
      'O(n),O(n^2),O(log n)', 
      'Try comparing characters from the beginning and end simultaneously', 2), 
 
-    (14, 
+    (9, 
      'Medium', 
      'Sorting', 
      'Sort an array of 0s, 1s, and 2s in linear time.
@@ -229,7 +241,7 @@ Output: [0,1,2]',
      'O(n),O(n^2),O(log n)', 
      'Consider using three pointers to organize the values', 2), 
 
-    (15, 
+    (10, 
      'Hard', 
      'Recursion', 
      'Generate all valid combinations of n pairs of parentheses.

@@ -52,7 +52,7 @@ export default function Question_Select() {
             style={styles.question}
             onPress={() =>
               navigation.navigate("Question-Solve", {
-                question: question.Question_Text,
+                questionID: question.QuestionID,
               })
             }
           >

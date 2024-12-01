@@ -4,18 +4,51 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAppContext } from "../../AppContext"; //To access user's accountID
+import { useFocusEffect } from "@react-navigation/native"; //for reloading the page when entering the screen
+
 
 export default function Explore() {
+  const { accountID } = useAppContext(); //Get the logged-in user's accountID
   const [questionOfTheDay, setQuestionOfTheDay] = useState(
     "What is the difference between let, const, and var in JavaScript?"
   );
+
+  //Displays the user's statistics, set to be 0 when first logging in
   const [stats, setStats] = useState({
-    attempted: 25,
-    completed: 20,
-    accuracy: "80%",
+    attempted: 0,
+    completed: 0,
+    accuracy: "0%",
   });
+
+  //To retrieve the user question history info and calculate user's statistics
+  const getStats = async () => {
+    try {
+      const response = await fetch(`http://192.168.x.x:3000/api/user/stats?accountID=${accountID}`);
+      if (!response.ok) {
+        Alert.alert("ERROR: Failed to get user stats"); //Error message if couldn't get user stats
+      }
+      const data = await response.json();
+      setStats(data); //Update stats with the retrieved data
+    } catch (error) {
+      console.error("ERROR: Could not get user stats:", error); //General error messages
+      Alert.alert("ERROR. Failed to get user stats. Please attempt again.");
+    }
+  };
+
+  //Reload stats to current status whenever the user returns to the Explore page
+  useFocusEffect(
+    React.useCallback(() => {
+      getStats();
+    }, [])
+  );
+
+  useEffect(() => {
+    getStats();
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -34,8 +67,8 @@ export default function Explore() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Stats</Text>
         <View style={styles.statsContainer}>
-          <Text style={styles.statItem}>Attempted: {stats.attempted}</Text>
-          <Text style={styles.statItem}>Completed: {stats.completed}</Text>
+          <Text style={styles.statItem}>Total Times Attempted: {stats.attempted}</Text>
+          <Text style={styles.statItem}>Correct Attempts: {stats.completed}</Text>
           <Text style={styles.statItem}>Accuracy: {stats.accuracy}</Text>
         </View>
       </View>

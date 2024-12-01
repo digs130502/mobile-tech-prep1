@@ -128,7 +128,7 @@ app.post("/api/login", async (req, res) => {
 
 //Endpoint for question-select
 app.get("/api/questions", (req, res) => {
-  db.query("SELECT QuestionID, Question_Text FROM Question", (err, results) => {
+  db.query("SELECT QuestionID, Question_Text, Difficulty, Topic FROM Question", (err, results) => {
     if (err) {
       //ERROR: Did not get questions
       console.error("Error fetching questions:", err);
@@ -214,6 +214,148 @@ app.post("/api/questions/create", (req, res) => {
       }); //Success message
     }
   );
+});
+
+//Endpoint to retrieve question info
+app.get("/api/question/:id", (req, res) => {
+  const questionID = req.params.id; //Get the logged-in questionvolunteers's accountID
+  db.query("SELECT QuestionID, Question_Text, DS_Q, Difficulty, Topic FROM Question WHERE QuestionID = ?",[questionID],
+    (err, results) => {
+      if (err) { //Error message if could not retrieve question info..
+        console.error("ERROR: Could not get question info:", err);
+        return res.status(500).json({ message: "ERROR in getting question info" });
+      }
+      //No match for the question/questionID
+      if (results.length === 0) {
+        return res.status(404).json({ message: "QuestionID not found" });
+      }
+
+      //Gets result and splits the DS_Q into separate answers instead of one string
+      const question = results[0];
+      question.answers = question.DS_Q.split(",");  //Splits the DS_Q string into array of answers
+      delete question.DS_Q; //Delete the original DS_Q
+      res.status(200).json(question); //Send the new result with separate answers.
+    }
+  );
+});
+
+//Endpoint to check the user's qeustion history databse to see if they have attempted it before.
+app.post('/api/user/history/check', (req, res) => {
+  const { accountID, questionID } = req.body; //Use accountID and questionID to search for the entry.
+  db.query("SELECT * FROM User_Question_History WHERE AccountID = ? AND QuestionID = ?", [accountID, questionID], 
+    (err, results) => {
+    if (err) { //Error message if could not check user hist..
+      console.error("ERROR: Could not check user history:", err);
+      return res.status(500).json({ message: "ERROR in getting checking user history" });
+    }
+
+    //Checks if a result is found matching both accountID and questionID
+    if (results.length > 0) {
+      res.json({ exists: true }); //If a match is found then the user has already attempted this question
+    } else {
+      res.json({ exists: false }); //If there is no match found then its the user's first attempt at the question
+    }
+  });
+});
+
+//Endpoint to update the user's history if attempted before
+app.post('/api/user/history/update', (req, res) => {
+  const { accountID, questionID, lastAttemptPASSFAIL } = req.body; //Things to retrieve to update in this endpoint
+  db.query(`UPDATE User_Question_History SET Attempts = Attempts + 1, Last_Attempted = NOW(), LastAttemptPASSFAIL = ?, Correct_Attempts = Correct_Attempts + IF(?, 1, 0), Incorrect_Attempts = Incorrect_Attempts + IF(?, 1, 0) WHERE AccountID = ? AND QuestionID = ?`, [
+    lastAttemptPASSFAIL,  //For the user's latest attempt (true or false)
+    lastAttemptPASSFAIL,  //For incrementing correct attempts (increment if it is true)
+    !lastAttemptPASSFAIL, //For incrementing incorrect attempts (increments if it is false)
+    accountID, //AccountID
+    questionID //QuestionID
+  ], (err, results) => {
+    if (err) { //Error message if could not update user hist..
+      console.error("ERROR: Could not update user history:", err);
+      return res.status(500).json({ message: "ERROR in updating user history" });
+    }
+    
+    //Checks if the update was successful
+    if (results.affectedRows > 0) {
+      res.status(200).json({ message: "User history updated" });
+    } else {
+      res.status(400).json({ message: "No user history record updated" });
+    }
+  });
+});
+
+//Endpoint to insert a question history record for a user (first time)
+app.post('/api/user/history/insert', (req, res) => {
+  const { accountID, questionID, difficulty, topic, lastAttemptPASSFAIL } = req.body; //Retrieve info needed to put in
+
+  const correctAttempts = lastAttemptPASSFAIL ? 1 : 0; //Set Correct Attempts to correct value based on user's last attempt
+  const incorrectAttempts = lastAttemptPASSFAIL ? 0 : 1;//Set Incorrect Attempts to correct value based on user's last attempt
+
+  db.query(`INSERT INTO User_Question_History (AccountID, QuestionID, Difficulty, Topic, Attempts, Correct_Attempts, Incorrect_Attempts, Last_Attempted, LastAttemptPASSFAIL)
+  VALUES (?, ?, ?, ?, 1, ?, ?, NOW(), ?)`, [accountID, questionID, difficulty, topic, correctAttempts, incorrectAttempts, lastAttemptPASSFAIL], (err, results) => {
+    if (err) { //Error message if could not insert user hist..
+      console.error("ERROR: Could not insert user question history:", err);
+      return res.status(500).json({ message: "ERROR in inserting user history" });
+    }
+    
+    res.status(200).json({ message: "User question history inserted" }); //Success message
+  });
+});
+
+// Function to calculate accuracy
+function calculateAccuracy(correctAttempts, totalAttempts) {
+  if (totalAttempts > 0) {
+    return ((correctAttempts / totalAttempts) * 100).toFixed(2);
+  }
+  return "0";
+}
+
+//Endpoint to get user stats and calculate
+app.get('/api/user/stats', (req, res) => {
+  const accountID = req.query.accountID; //Get the logged-in user's accountID
+
+  if (!accountID) { //If accountID is not found
+    return res.status(400).json({ message: "AccountID must be present:" });
+  }
+
+  db.query(`SELECT SUM(Attempts) AS total_attempts, SUM(Correct_Attempts) AS correct_attempts FROM User_Question_History WHERE AccountID = ?`, [accountID], (err, results) => {
+    if (err) {//Error message if could not retrieve user stats.
+      console.error("ERROR: Could not get user stats:", err);
+      return res.status(500).json({ message: "ERROR in getting user stats" });
+    }
+
+    const totalAttempts = results[0].total_attempts || 0; //saves total attempts, if zero, then set to 0
+    const correctAttempts = results[0].correct_attempts || 0; //saves correct attempts, if zzero, then set to 0
+    const accuracy = calculateAccuracy(correctAttempts, totalAttempts); //calls function to calculate accuracy
+
+    //Sends back calculations/stats for displaying
+    res.status(200).json({ attempted: totalAttempts, completed: correctAttempts, accuracy: `${accuracy}%`,
+    });
+  });
+});
+
+//Endpoint to get question volunteer question stats and calculate
+app.get('/api/volunteer/stats', (req, res) => {
+  const accountID = req.query.accountID;  //Get the logged-in question volunteer's accountID
+
+  //If accountID is not found
+  if (!accountID) {
+    return res.status(400).json({ message: "AccountID must be present:" });
+  }
+
+  db.query("SELECT SUM(UQH.Attempts) AS total_attempts, SUM(UQH.Correct_Attempts) AS correct_attempts FROM User_Question_History UQH JOIN Question Q ON UQH.QuestionID = Q.QuestionID WHERE Q.creatorID = ?", [accountID], 
+    (err, results) => {
+    if (err) { //Error message if could not retrieve question volunteer stats.
+      console.error("ERROR: Could not get question volunteer stats:", err);
+      return res.status(500).json({ message: "ERROR in getting question volunteer stats" });
+    }
+
+    const totalAttempts = results[0].total_attempts || 0; //saves total attempts, if zero, then set to 0
+    const correctAttempts = results[0].correct_attempts || 0; //saves correct attempts, if zzero, then set to 0
+    const accuracy = calculateAccuracy(correctAttempts, totalAttempts); //calls function to calculate accuracy
+
+    //Sends back calculations/stats for displaying
+    res.status(200).json({ attempted: totalAttempts, completed: correctAttempts, accuracy: `${accuracy}%`,
+    });
+  });
 });
 
 //Start Node.js Express server
