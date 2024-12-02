@@ -146,6 +146,9 @@ export default function QuestionSolveScreen() {
       Alert.alert("Incorrect!", "Try again.");
     }
   };
+  const saveQuestion = () => {
+    /* save question */
+  }
 
   useEffect(() => {
     getQuestionInfo();
@@ -157,6 +160,14 @@ export default function QuestionSolveScreen() {
         <ScrollView>
           <Text style={styles.questionText}>{question}</Text>
         </ScrollView>
+      </View>
+      {/* if needed, add more buttons here. they will align automatically*/}
+      <View style={styles.interactionBar}>
+        <TouchableOpacity
+        style={styles.interactionButton}
+        onPress={saveQuestion}>
+        💾
+        </TouchableOpacity>
       </View>
       <View>
         {answers.map((answer, i) => (
@@ -187,6 +198,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  interactionBar:{
+    display:"flex",
+    width:"90%",
+    flexDirection:"row-reverse"
+  },
+  interactionButton:{
+    width:32,
+    aspectRatio: "1/1",
+    borderRadius: 10,
+    backgroundColor: "#D7D7D7",
+    fontSize:20,
+    textAlign:"center"
   },
   questionBox: {
     width: "90%",
