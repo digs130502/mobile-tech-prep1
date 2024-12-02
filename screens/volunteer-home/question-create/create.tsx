@@ -156,7 +156,9 @@ export default function Create() {
               onChangeText={setTopic}
               value={topic}
             />
-            <Text style={styles.header}>Answers - Specify First Answer as Correct</Text>
+            <Text style={styles.header}>
+              Answers - Specify First Answer as Correct
+            </Text>
           </View>
         }
         data={answers}

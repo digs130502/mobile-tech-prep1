@@ -30,7 +30,9 @@ export default function VolunteerExplore() {
       return;
     }
     try {
-      const response = await fetch(`http://192.168.x.x:3000/api/volunteer/stats?accountID=${accountID}`);
+      const response = await fetch(
+        `http://192.168.x.x:3000/api/volunteer/stats?accountID=${accountID}`
+      );
       if (!response.ok) {
         Alert.alert("ERROR: Failed to get question volunteer stats"); //Error message if couldn't get QV stats
       }
@@ -39,7 +41,9 @@ export default function VolunteerExplore() {
       setStats(data); //Update stats with the retrieved data
     } catch (error) {
       console.error("ERROR: Could not get question volunteer stats:", error); //General error messages
-      Alert.alert("ERROR. Failed to get question volunteer stats. Please attempt again.");
+      Alert.alert(
+        "ERROR. Failed to get question volunteer stats. Please attempt again."
+      );
     }
   };
 
@@ -64,8 +68,12 @@ export default function VolunteerExplore() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Created Question Stats</Text>
         <View style={styles.statsContainer}>
-          <Text style={styles.statItem}>Times Attempted: {stats.attempted}</Text>
-          <Text style={styles.statItem}>Correct Attempts: {stats.completed}</Text>
+          <Text style={styles.statItem}>
+            Times Attempted: {stats.attempted}
+          </Text>
+          <Text style={styles.statItem}>
+            Correct Attempts: {stats.completed}
+          </Text>
           <Text style={styles.statItem}>Accuracy: {stats.accuracy}</Text>
         </View>
       </View>

@@ -17,6 +17,7 @@ import MyVolunteerSettingsScreen from "./screens/volunteer-home/volunteer-settin
 import MyVolunteerEditScreen from "./screens/volunteer-home/volunteer-settings/volunteer-edit";
 import MyCreationScreen from "./screens/volunteer-home/question-create/create";
 import MyQuestionSolvingScreen from "./screens/home/questions/question-solve";
+import MyQuestionHistoryScreen from "./screens/home/explore-screens/question-history";
 import {
   RootStackParamList,
   TabParamList,
@@ -25,6 +26,7 @@ import {
   VolunteerSettingParamList,
   QuestionCreationParamList,
   QuestionSelectionParamList,
+  ExploreParamList,
 } from "./navigation/types";
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -36,11 +38,12 @@ const VolunteerSettingsStack =
 const QuestionCreateStack = createStackNavigator<QuestionCreationParamList>();
 const QuestionSelectionStack =
   createStackNavigator<QuestionSelectionParamList>();
+const ExploreStack = createStackNavigator<ExploreParamList>();
 
 function HomeTabs() {
   return (
     <Tab.Navigator>
-      <Tab.Screen name="Explore" component={MyExploreScreen} />
+      <Tab.Screen name="Explore" component={ExploreTab} />
       <Tab.Screen name="Question-Select" component={QuestionSelectionTab} />
       <Tab.Screen name="Settings" component={SettingsTab} />
     </Tab.Navigator>
@@ -125,6 +128,22 @@ function QuestionSelectionTab() {
         component={MyQuestionSolvingScreen}
       />
     </QuestionSelectionStack.Navigator>
+  );
+}
+
+function ExploreTab() {
+  return (
+    <ExploreStack.Navigator>
+      <ExploreStack.Screen
+        name="Explore"
+        component={MyExploreScreen}
+        options={{ headerShown: false }}
+      />
+      <ExploreStack.Screen
+        name="Question-History"
+        component={MyQuestionHistoryScreen}
+      />
+    </ExploreStack.Navigator>
   );
 }
 

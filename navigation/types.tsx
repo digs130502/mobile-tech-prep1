@@ -41,3 +41,11 @@ export type QuestionSelectionParamList = {
   "Question-Select": undefined;
   "Question-Solve": { questionID: number };
 };
+
+export type ExploreParamList = {
+  Explore: undefined;
+  "Question-History": undefined;
+  completed: undefined;
+  question: undefined;
+  attempts: undefined;
+};

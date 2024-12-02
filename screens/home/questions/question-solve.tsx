@@ -20,7 +20,7 @@ export default function QuestionSolveScreen() {
   const { accountID } = useAppContext(); //Get accountID for use
 
   //Set variables for questions, answers, revealing the answer, correct answer, the user's selected answer, difficulty, and topic.
-  const [revealed, setRevealed] = useState(false); 
+  const [revealed, setRevealed] = useState(false);
   const [question, setQuestion] = useState<string>("");
   const [answers, setAnswers] = useState<string[]>([]);
   const [correctAnswer, setCorrectAnswer] = useState<string>("");
@@ -31,20 +31,21 @@ export default function QuestionSolveScreen() {
   //To get the details of the question
   const getQuestionInfo = async () => {
     try {
-      const response = await fetch(`http://192.168.x.x:3000/api/question/${questionID}`);
+      const response = await fetch(
+        `http://192.168.x.x:3000/api/question/${questionID}`
+      );
       if (response.ok) {
         const data = await response.json();
         setQuestion(data.Question_Text); //Set the question text
         setCorrectAnswer(data.answers[0]); //First answer in DS_Q attribute is always correct
         setAnswers(shuffle(data.answers)); //Shuffle the answer order
         setDifficulty(data.Difficulty); //Set difficulty
-        setTopic(data.Topic);//Set Topic
-      } 
-      else {
+        setTopic(data.Topic); //Set Topic
+      } else {
         Alert.alert("ERROR: Failed to get question info"); //Error message if couldn't get question info
       }
-
-    } catch (error) { //General Error Messages
+    } catch (error) {
+      //General Error Messages
       console.error("ERROR: Could not get question info:", error);
       Alert.alert("ERROR. Failed to load the question. Please attempt again.");
     }
@@ -62,40 +63,60 @@ export default function QuestionSolveScreen() {
   //To update the user question history for when a user attempts a question (again or for the first time)
   const updateUserHistory = async (isCorrect: boolean) => {
     try {
-      const checkResponse = await fetch(`http://192.168.x.x:3000/api/user/history/check`, {
-        method: "POST", headers: {"Content-Type": "application/json",},
-        body: JSON.stringify({ accountID, questionID, }), //Send accountID and questionID to search for that question in the history
-      });
+      const checkResponse = await fetch(
+        `http://192.168.x.x:3000/api/user/history/check`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accountID, questionID }), //Send accountID and questionID to search for that question in the history
+        }
+      );
 
       if (!checkResponse.ok) {
         Alert.alert("ERROR: Failed to get question info"); //Error message if couldn't get question info
       }
 
       const checkHistory = await checkResponse.json();
-      const historyInfo = { accountID, questionID, difficulty, topic, lastAttemptPASSFAIL: isCorrect, };
+      const historyInfo = {
+        accountID,
+        questionID,
+        difficulty,
+        topic,
+        lastAttemptPASSFAIL: isCorrect,
+      };
 
       if (checkHistory.exists) {
         //If the user has attempted the question before, then update that question's history info
-        const updateResponse = await fetch("http://192.168.x.x:3000/api/user/history/update", {
-          method: "POST", headers: { "Content-Type": "application/json", },
-          body: JSON.stringify({ accountID: accountID, questionID: questionID, difficulty: difficulty, topic: topic, lastAttemptPASSFAIL: isCorrect,
-          }), //Send all info to update that question entry in the user history question database
-        });
+        const updateResponse = await fetch(
+          "http://192.168.x.x:3000/api/user/history/update",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accountID: accountID,
+              questionID: questionID,
+              difficulty: difficulty,
+              topic: topic,
+              lastAttemptPASSFAIL: isCorrect,
+            }), //Send all info to update that question entry in the user history question database
+          }
+        );
 
         if (!updateResponse.ok) {
           Alert.alert("ERROR: Failed to update user's history"); //Error message if could not update user history
         }
 
         const updateResult = await updateResponse.json();
-
-      } 
-      
-      else {
+      } else {
         //This is the user's first attempt at the question, so insert a new question history record
-        const insertResponse = await fetch("http://192.168.x.x:3000/api/user/history/insert", {
-          method: "POST", headers: {"Content-Type": "application/json",},
-          body: JSON.stringify(historyInfo), //Send the info to input into a new question record for the user
-        });
+        const insertResponse = await fetch(
+          "http://192.168.x.x:3000/api/user/history/insert",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(historyInfo), //Send the info to input into a new question record for the user
+          }
+        );
 
         if (!insertResponse.ok) {
           Alert.alert("ERROR: Failed to insert user's history"); //Error message if could not insert user history
@@ -103,7 +124,9 @@ export default function QuestionSolveScreen() {
       }
     } catch (error) {
       console.error("ERROR: Could not update user history:", error); //General error messages
-      Alert.alert("ERROR: Could not update user history. Please attempt again.");
+      Alert.alert(
+        "ERROR: Could not update user history. Please attempt again."
+      );
     }
   };
 
