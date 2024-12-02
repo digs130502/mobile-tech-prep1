@@ -6,6 +6,7 @@ export type RootStackParamList = {
   Volunteer: undefined;
   Home: undefined; // For the HomeTabs component
   "Volunteer-Home": undefined; // For the VolunteerHomeTabs component
+  "Forgot-Password": undefined;
 };
 
 export type TabParamList = {

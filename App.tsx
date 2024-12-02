@@ -18,6 +18,7 @@ import MyVolunteerEditScreen from "./screens/volunteer-home/volunteer-settings/v
 import MyCreationScreen from "./screens/volunteer-home/question-create/create";
 import MyQuestionSolvingScreen from "./screens/home/questions/question-solve";
 import MyQuestionHistoryScreen from "./screens/home/explore-screens/question-history";
+import MyForgotPasswordScreen from "./screens/account/forgot-password";
 import {
   RootStackParamList,
   TabParamList,
@@ -154,6 +155,10 @@ export default function App() {
         <Stack.Navigator initialRouteName="Login">
           {/* Login/Signup Stack */}
           <Stack.Screen name="Login" component={MyLoginScreen} />
+          <Stack.Screen
+            name="Forgot-Password"
+            component={MyForgotPasswordScreen}
+          />
           <Stack.Screen name="Account" component={MyAccountScreen} />
           <Stack.Screen name="Learner" component={MyLearnerScreen} />
           <Stack.Screen name="Volunteer" component={MyVolunteerScreen} />
