@@ -59,7 +59,7 @@ export default function Login({ navigation }: LoginProps) {
         Alert.alert("Login Failed", "Incorrect password");
       } else {
         //General error message
-        Alert.alert("Login Failed", "An unknown error occured");
+        Alert.alert("Login Failed", "An unknown error occurred");
       }
     } catch (error) {
       Alert.alert("ERROR. Something went wrong, Please attempt again."); // General error message
@@ -71,8 +71,15 @@ export default function Login({ navigation }: LoginProps) {
     navigation.navigate("Account");
   };
 
+  const handleForgotPassword = () => {
+    navigation.navigate("Forgot-Password"); // Navigate to ForgotPassword screen
+  };
+
   return (
     <View style={styles.container}>
+      {/* App Title */}
+      <Text style={styles.title}>Mobile Tech Prep</Text>
+
       {/* Email Text Input */}
       <TextInput
         style={styles.input}
@@ -100,6 +107,11 @@ export default function Login({ navigation }: LoginProps) {
         <Text>Log In</Text>
       </TouchableOpacity>
 
+      {/* Forgot Password Button */}
+      <TouchableOpacity onPress={handleForgotPassword}>
+        <Text style={styles.forgotPassword}>Forgot Password?</Text>
+      </TouchableOpacity>
+
       {/* Or */}
       <Text style={styles.or}>Or</Text>
 
@@ -118,6 +130,12 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff",
   },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
   input: {
     height: 50,
     borderColor: "#ccc",
@@ -133,6 +151,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     margin: 10,
+  },
+  forgotPassword: {
+    textAlign: "center",
+    marginVertical: 10,
+    color: "#0000EE",
+    textDecorationLine: "underline",
   },
   or: {
     textAlign: "center",
