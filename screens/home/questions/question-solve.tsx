@@ -27,6 +27,8 @@ export default function QuestionSolveScreen() {
   const [difficulty, setDifficulty] = useState<string>("");
   const [topic, setTopic] = useState<string>("");
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [hint, setHint] = useState<string>("");
+  const [revealedHint, setRevealedHint] = useState(false);
 
   //To get the details of the question
   const getQuestionInfo = async () => {
@@ -41,6 +43,7 @@ export default function QuestionSolveScreen() {
         setAnswers(shuffle(data.answers)); //Shuffle the answer order
         setDifficulty(data.Difficulty); //Set difficulty
         setTopic(data.Topic); //Set Topic
+        setHint(data.hint); //Set Hint
       } else {
         Alert.alert("ERROR: Failed to get question info"); //Error message if couldn't get question info
       }
@@ -186,8 +189,22 @@ export default function QuestionSolveScreen() {
           >
             <Text>{answer}</Text>
           </TouchableOpacity>
+          
         ))}
       </View>
+      
+      {/* hint section */}
+      <View style={styles.interactionBar}>
+      <TouchableOpacity
+        style={styles.interactionButton}
+        onPress={()=>{setRevealedHint(!revealedHint)}}>
+        ?
+        </TouchableOpacity>
+      </View>
+      <View style={revealedHint ? styles.questionBox : styles.hide}>
+          <Text>{hint}</Text>
+      </View>
+
     </View>
   );
 }
@@ -246,5 +263,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginVertical: 5,
+  },
+  hide:{
+    display:"none"
   },
 });
