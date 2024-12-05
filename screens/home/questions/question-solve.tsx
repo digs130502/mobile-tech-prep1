@@ -43,7 +43,7 @@ export default function QuestionSolveScreen() {
         setAnswers(shuffle(data.answers)); //Shuffle the answer order
         setDifficulty(data.Difficulty); //Set difficulty
         setTopic(data.Topic); //Set Topic
-        setHint(data.hint); //Set Hint
+        // setHint(data.hint); //Set Hint   <- originally used to obtain hint
       } else {
         Alert.alert("ERROR: Failed to get question info"); //Error message if couldn't get question info
       }
@@ -202,7 +202,7 @@ export default function QuestionSolveScreen() {
         </TouchableOpacity>
       </View>
       <View style={revealedHint ? styles.questionBox : styles.hide}>
-          <Text>{hint}</Text>
+          <Text>HINT TEXT GOES HERE{/*{hint}*/}</Text>
       </View>
 
     </View>
