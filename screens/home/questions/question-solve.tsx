@@ -151,7 +151,7 @@ export default function QuestionSolveScreen() {
   };
   const saveQuestion = () => {
     /* save question */
-  }
+  };
 
   useEffect(() => {
     getQuestionInfo();
@@ -167,9 +167,10 @@ export default function QuestionSolveScreen() {
       {/* if needed, add more buttons here. they will align automatically*/}
       <View style={styles.interactionBar}>
         <TouchableOpacity
-        style={styles.interactionButton}
-        onPress={saveQuestion}>
-        💾
+          style={styles.interactionButton}
+          onPress={saveQuestion}
+        >
+          💾
         </TouchableOpacity>
       </View>
       <View>
@@ -189,22 +190,23 @@ export default function QuestionSolveScreen() {
           >
             <Text>{answer}</Text>
           </TouchableOpacity>
-          
         ))}
       </View>
-      
+
       {/* hint section */}
       <View style={styles.interactionBar}>
-      <TouchableOpacity
-        style={styles.interactionButton}
-        onPress={()=>{setRevealedHint(!revealedHint)}}>
-        ?
+        <TouchableOpacity
+          style={styles.interactionButton}
+          onPress={() => {
+            setRevealedHint(!revealedHint);
+          }}
+        >
+          ?
         </TouchableOpacity>
       </View>
       <View style={revealedHint ? styles.questionBox : styles.hide}>
-          <Text>HINT TEXT GOES HERE{/*{hint}*/}</Text>
+        <Text>HINT TEXT GOES HERE{/*{hint}*/}</Text>
       </View>
-
     </View>
   );
 }
@@ -216,18 +218,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
   },
-  interactionBar:{
-    display:"flex",
-    width:"90%",
-    flexDirection:"row-reverse"
+  interactionBar: {
+    display: "flex",
+    width: "90%",
+    flexDirection: "row-reverse",
   },
-  interactionButton:{
-    width:32,
+  interactionButton: {
+    width: 32,
     aspectRatio: "1/1",
     borderRadius: 10,
     backgroundColor: "#D7D7D7",
-    fontSize:20,
-    textAlign:"center"
+    fontSize: 20,
+    textAlign: "center",
   },
   questionBox: {
     width: "90%",
@@ -264,7 +266,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 5,
   },
-  hide:{
-    display:"none"
+  hide: {
+    display: "none",
   },
 });

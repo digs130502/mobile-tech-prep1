@@ -46,6 +46,7 @@ export type QuestionSelectionParamList = {
 export type ExploreParamList = {
   Explore: undefined;
   "Question-History": undefined;
+  "Bookmarked-Questions": undefined;
   completed: undefined;
   question: undefined;
   attempts: undefined;

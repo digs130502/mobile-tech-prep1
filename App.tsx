@@ -19,6 +19,7 @@ import MyCreationScreen from "./screens/volunteer-home/question-create/create";
 import MyQuestionSolvingScreen from "./screens/home/questions/question-solve";
 import MyQuestionHistoryScreen from "./screens/home/explore-screens/question-history";
 import MyForgotPasswordScreen from "./screens/account/forgot-password";
+import MyBookmaredQuestionsScreen from "./screens/home/explore-screens/bookmarked-questions";
 import {
   RootStackParamList,
   TabParamList,
@@ -143,6 +144,10 @@ function ExploreTab() {
       <ExploreStack.Screen
         name="Question-History"
         component={MyQuestionHistoryScreen}
+      />
+      <ExploreStack.Screen
+        name="Bookmarked-Questions"
+        component={MyBookmaredQuestionsScreen}
       />
     </ExploreStack.Navigator>
   );
