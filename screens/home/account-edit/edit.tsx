@@ -31,10 +31,13 @@ export default function Edit() {
 
     try {
       //Checks if the email is correct/matches the current user
-      const response = await fetch(`http://192.168.x.x:3000/api/account/email?accountID=${accountID}`, {
-      });
+      const response = await fetch(
+        `http://192.168.x.x:3000/api/account/email?accountID=${accountID}`,
+        {}
+      );
 
-      if (!response.ok) { //If could not get current email, give error messages
+      if (!response.ok) {
+        //If could not get current email, give error messages
         console.error("Failed to get current email");
         Alert.alert("ERROR: Failed to get current email");
         return;
@@ -42,17 +45,21 @@ export default function Edit() {
 
       const data = await response.json(); //Get response
       //Compares emails in lowercase to disregard uppercase
-      if (data.email.toLowerCase() !== email.toLowerCase()) { //Give error message if the entered email is incorrect
+      if (data.email.toLowerCase() !== email.toLowerCase()) {
+        //Give error message if the entered email is incorrect
         Alert.alert("ERROR: Entered email does not match your current email.");
         return;
       }
 
       //Checka if the current password is correct.
-      const passwordCheckResponse = await fetch("http://192.168.x.x:3000/api/check/current/password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, currentPassword }), //Checks using the current password entered by user
-      });
+      const passwordCheckResponse = await fetch(
+        "http://192.168.x.x:3000/api/check/current/password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, currentPassword }), //Checks using the current password entered by user
+        }
+      );
 
       const passwordCheckData = await passwordCheckResponse.json(); //Get response
       //If current password is different than the one in the database, give error message
@@ -62,27 +69,36 @@ export default function Edit() {
       }
 
       //Checks if the new password entered by user is not the same as the old password
-      const newPasswordCheckResponse = await fetch("http://192.168.x.x:3000/api/check/new/password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword }), //Give new password for comparison
-      });
+      const newPasswordCheckResponse = await fetch(
+        "http://192.168.x.x:3000/api/check/new/password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, newPassword }), //Give new password for comparison
+        }
+      );
 
       const newPasswordCheckData = await newPasswordCheckResponse.json(); //Get response
       //If the current password and new password are not different (the same), then give error message
       if (newPasswordCheckData.isDifferent === false) {
-        Alert.alert("ERROR: The new password cannot be the same as your current password.");
+        Alert.alert(
+          "ERROR: The new password cannot be the same as your current password."
+        );
         return;
       }
 
       //Resets the password with the new password if everything is correct so far
-      const resetPasswordResponse = await fetch("http://192.168.x.x:3000/api/reset/password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, newPassword }), //Give new password to use to reset.
-      });
+      const resetPasswordResponse = await fetch(
+        "http://192.168.x.x:3000/api/reset/password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, newPassword }), //Give new password to use to reset.
+        }
+      );
 
-      if (!resetPasswordResponse.ok) { //If could not reset the password.
+      if (!resetPasswordResponse.ok) {
+        //If could not reset the password.
         console.error("Failed to reset the password");
         Alert.alert("ERROR: Failed to reset password");
         return;
@@ -95,7 +111,8 @@ export default function Edit() {
       } else {
         Alert.alert("ERROR: Failed to update the password.");
       }
-    } catch (error) { //General error messages.
+    } catch (error) {
+      //General error messages.
       console.error("Error during password update process:", error);
       Alert.alert("ERROR: An error occurred. Please attempt again.");
     }

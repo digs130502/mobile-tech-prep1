@@ -32,21 +32,24 @@ export default function Learner({ navigation }: LoginProps) {
       return;
     }
 
-     //Call function and check email format
-     if (!checkEmailFormat(email)) {
+    //Call function and check email format
+    if (!checkEmailFormat(email)) {
       Alert.alert("ERROR: Invalid email format.");
       return;
     }
 
     //Checks if the email is already used/taken
-    const emailCheckResponse = await fetch("http://192.168.x.x:3000/api/check/email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", },
-      body: JSON.stringify({ email, }),
-    });
+    const emailCheckResponse = await fetch(
+      "http://192.168.x.x:3000/api/check/email",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      }
+    );
 
     const emailCheckData = await emailCheckResponse.json(); //Get response
-  
+
     //If email already exists in database
     if (emailCheckData.exists) {
       Alert.alert("ERROR: Email is already taken"); //Give error message that learner can't use this email

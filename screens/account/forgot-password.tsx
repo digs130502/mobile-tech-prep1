@@ -32,7 +32,7 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
       Alert.alert("ERROR: Please fill in all fields.");
       return;
     }
-    
+
     //Call function and check email format
     if (!checkEmailFormat(email)) {
       Alert.alert("ERROR: Invalid email format.");
@@ -47,7 +47,9 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
 
     try {
       //Checks if the email exists in database
-      const emailCheckResponse = await fetch("http://192.168.x.x:3000/api/check/email", {
+      const emailCheckResponse = await fetch(
+        "http://192.168.x.x:3000/api/check/email",
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
@@ -62,7 +64,9 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
       }
 
       //Check if the new password is the same as the current password stored in the database
-      const passwordCheckResponse = await fetch("http://192.168.x.x:3000/api/check/new/password", {
+      const passwordCheckResponse = await fetch(
+        "http://192.168.x.x:3000/api/check/new/password",
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, newPassword }), //send email and newpassword to compare to current password
@@ -73,15 +77,19 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
 
       //If the new password entered is not different
       if (!passwordCheckData.isDifferent) {
-        Alert.alert("ERROR: New password cannot be the same as the old password.");
+        Alert.alert(
+          "ERROR: New password cannot be the same as the old password."
+        );
         return;
       }
 
       //Reset passwrod
-      const response = await fetch("http://192.168.x.x:3000/api/reset/password", {
+      const response = await fetch(
+        "http://192.168.x.x:3000/api/reset/password",
+        {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, newPassword, }), //send email and newpassword to replace old password
+          body: JSON.stringify({ email, newPassword }), //send email and newpassword to replace old password
         }
       );
 
@@ -92,13 +100,14 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
             onPress: () => navigation.navigate("Login"), //navigate to login page if successful
           },
         ]);
-      } 
-      else { //If could not reset password
+      } else {
+        //If could not reset password
         Alert.alert("ERROR: Failed to reset password. Please try again.");
       }
-    } catch (error) { //General error messages.
+    } catch (error) {
+      //General error messages.
       Alert.alert("ERROR. Something went wrong. Please try again.");
-      console.error("Could not reset password:", error); 
+      console.error("Could not reset password:", error);
     }
   };
 

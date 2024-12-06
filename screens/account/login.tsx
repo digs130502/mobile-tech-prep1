@@ -32,8 +32,8 @@ export default function Login({ navigation }: LoginProps) {
       return;
     }
 
-     //Call function and check email format
-     if (!checkEmailFormat(email)) {
+    //Call function and check email format
+    if (!checkEmailFormat(email)) {
       Alert.alert("ERROR: Invalid email format.");
       return;
     }

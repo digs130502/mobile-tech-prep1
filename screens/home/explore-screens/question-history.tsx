@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useAppContext } from "../../../AppContext"; //For using user's account id.
 import { ExploreParamList } from "../../../navigation/types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { format } from "date-fns";  //Import date-fns for date formatting in question history
+import { format } from "date-fns"; //Import date-fns for date formatting in question history
 
-type HistoryItem = { //Lists all information needed to display to the user.
+type HistoryItem = {
+  //Lists all information needed to display to the user.
   question: string;
   attempts: number;
   correctAttempts: number;
@@ -29,14 +30,18 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
   //Get all history information from database.
   const getHistory = async () => {
     try {
-      const response = await fetch(`http://192.168.x.x:3000/api/user/history/details?accountID=${accountID}`);
+      const response = await fetch(
+        `http://192.168.x.x:3000/api/user/history/details?accountID=${accountID}`
+      );
 
-      if (!response.ok) { //If could not get information
+      if (!response.ok) {
+        //If could not get information
         Alert.alert("Failed to get question history");
       }
       const data: HistoryItem[] = await response.json(); //Get response
       setHistory(data); //Set the History with all of the data retrieved.
-    } catch (error) { //General error message.
+    } catch (error) {
+      //General error message.
       console.error("Error getting question history:", error);
     }
   };
@@ -59,7 +64,10 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
           <Text>Incorrect Attempts: {item.incorrectAttempts}</Text>
           <Text>Accuracy: {item.accuracy}%</Text>
           <Text>Last Attempt: {item.lastAttempt}</Text>
-          <Text>Last Attempt Time: {format(new Date(item.lastAttemptTime), 'MMMM dd, yyyy, h:mm a')}</Text>
+          <Text>
+            Last Attempt Time:{" "}
+            {format(new Date(item.lastAttemptTime), "MMMM dd, yyyy, h:mm a")}
+          </Text>
         </View>
       ))}
     </ScrollView>

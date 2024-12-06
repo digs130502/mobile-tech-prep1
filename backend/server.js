@@ -394,7 +394,9 @@ app.get("/api/volunteer/stats", (req, res) => {
       if (err) {
         //Error message if could not retrieve question volunteer stats.
         console.error("ERROR: Could not get question volunteer stats:", err);
-        return res.status(500).json({ message: "ERROR in getting question volunteer stats" });
+        return res
+          .status(500)
+          .json({ message: "ERROR in getting question volunteer stats" });
       }
 
       const totalAttempts = results[0].total_attempts || 0; //saves total attempts, if zero, then set to 0
@@ -415,25 +417,21 @@ app.get("/api/volunteer/stats", (req, res) => {
 app.post("/api/check/email", (req, res) => {
   const { email } = req.body;
 
-  db.query(
-    "SELECT * FROM Account WHERE Email = ?",
-    [email],
-    (err, results) => {
-      if (err) {
-        //Error message if could not retrieve email.
-        console.error("Error checking email:", err);
-        return res.status(500).json({ message: "ERROR: Could not check email" });
-      }
-
-      //If email was not found.
-      if (results.length === 0) {
-        return res.status(404).json({ exists: false });
-      }
-
-      //If email was successfully found.
-      return res.status(200).json({ exists: true });
+  db.query("SELECT * FROM Account WHERE Email = ?", [email], (err, results) => {
+    if (err) {
+      //Error message if could not retrieve email.
+      console.error("Error checking email:", err);
+      return res.status(500).json({ message: "ERROR: Could not check email" });
     }
-  );
+
+    //If email was not found.
+    if (results.length === 0) {
+      return res.status(404).json({ exists: false });
+    }
+
+    //If email was successfully found.
+    return res.status(200).json({ exists: true });
+  });
 });
 
 //Endpoint to reset the user's password
@@ -447,9 +445,12 @@ app.post("/api/reset/password", async (req, res) => {
     "UPDATE Account SET Pass = ? WHERE Email = ?",
     [hashedPassword, email],
     (err, results) => {
-      if (err) { //Error message if could not reset pass.
+      if (err) {
+        //Error message if could not reset pass.
         console.error("Error resetting password:", err);
-        return res.status(500).json({ message: "ERROR: Could not reset password" });
+        return res
+          .status(500)
+          .json({ message: "ERROR: Could not reset password" });
       }
 
       //If password was not updated (nothing was changed)
@@ -472,9 +473,12 @@ app.post("/api/check/current/password", async (req, res) => {
     "SELECT Pass FROM Account WHERE Email = ?",
     [email],
     async (err, results) => {
-      if (err) { //Error message if could not get pass.
+      if (err) {
+        //Error message if could not get pass.
         console.error("Error getting user password:", err);
-        return res.status(500).json({ message: "ERROR: Could not get password" });
+        return res
+          .status(500)
+          .json({ message: "ERROR: Could not get password" });
       }
 
       //If email was not found.
@@ -485,7 +489,10 @@ app.post("/api/check/current/password", async (req, res) => {
       const currentHashedPassword = results[0].Pass; //Get the password from database
 
       //Compare the current password with the current password hashed
-      const match = await bcrypt.compare(currentPassword, currentHashedPassword);
+      const match = await bcrypt.compare(
+        currentPassword,
+        currentHashedPassword
+      );
 
       if (match) {
         return res.status(400).json({
@@ -508,9 +515,12 @@ app.post("/api/check/new/password", async (req, res) => {
     "SELECT Pass FROM Account WHERE Email = ?",
     [email],
     async (err, results) => {
-      if (err) { //Error message if could not get pass.
+      if (err) {
+        //Error message if could not get pass.
         console.error("Error getting user password:", err);
-        return res.status(500).json({ message: "ERROR: Could not get password" });
+        return res
+          .status(500)
+          .json({ message: "ERROR: Could not get password" });
       }
 
       //If email was not found.
@@ -543,9 +553,12 @@ app.get("/api/account/email", (req, res) => {
     "SELECT Email FROM Account WHERE AccountID = ?",
     [accountID],
     (err, results) => {
-      if (err) { //Error message if could not get email
+      if (err) {
+        //Error message if could not get email
         console.error("Error getting user email:", err);
-        return res.status(500).json({ message: "ERROR: Could not get user email" });
+        return res
+          .status(500)
+          .json({ message: "ERROR: Could not get user email" });
       }
 
       //If email was not found.
@@ -571,13 +584,16 @@ app.get("/api/user/history/details", (req, res) => {
      WHERE uqh.AccountID = ?`,
     [accountID],
     (err, results) => {
-      if (err) { //If could not get user question history
+      if (err) {
+        //If could not get user question history
         console.error("Error getting question history:", err);
-        return res.status(500).json({ message: "ERROR: Could not get question history" });
+        return res
+          .status(500)
+          .json({ message: "ERROR: Could not get question history" });
       }
 
       //Set response with all the data from the query.
-      const historyData = results.map(item => ({
+      const historyData = results.map((item) => ({
         question: item.Question_Text,
         attempts: item.Attempts,
         correctAttempts: item.Correct_Attempts,
@@ -586,7 +602,7 @@ app.get("/api/user/history/details", (req, res) => {
         difficulty: item.Difficulty,
         topic: item.Topic,
         lastAttempt: item.LastAttemptPASSFAIL ? "Pass" : "Fail", //Either Passed or Failed for last attempt (1 or 0)
-        lastAttemptTime: item.Last_Attempted
+        lastAttemptTime: item.Last_Attempted,
       }));
 
       res.status(200).json(historyData); //Send all the history data back for displaying
