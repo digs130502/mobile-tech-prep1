@@ -11,14 +11,14 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
 import { useAppContext } from "../../AppContext"; //access account ID
 
-type LoginProps = NativeStackScreenProps<RootStackParamList, "Volunteer">;
+type LoginProps = NativeStackScreenProps<RootStackParamList, "Admin">;
 
-export default function Question_Volunteer({ navigation }: LoginProps) {
-  const [email, setEmail] = useState(""); //Set up email variable
-  const [password, setPassword] = useState(""); //Set up password variable
+export default function Admin({ navigation }: LoginProps) {
+  const [email, setEmail] = useState(""); // Set up email variable
+  const [password, setPassword] = useState(""); // Set up password variable
   const { setAccountID } = useAppContext(); //access account ID
 
-  //Sign up functionality for Question Volunteer
+  // Sign up functionality for Admin
   const handleSignUp = async () => {
     try {
       const response = await fetch("http://192.168.1.159:3000/api/signup", {
@@ -29,29 +29,29 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
         body: JSON.stringify({
           email,
           password,
-          role: "Question Volunteer", //Give email, password, and role as the request body.
+          role: "Admin", // Changed role to Admin
         }),
       });
 
-      const data = await response.json(); //Wait for response from endpoint
+      const data = await response.json(); // Wait for response from endpoint
 
       if (response.ok) {
-        Alert.alert("SUCCESS", "Account created successfully!"); //Success message
+        Alert.alert("SUCCESS", "Admin account created successfully!"); // Success message
         const { accountID } = data;
-        setAccountID(accountID); //Set the account ID
-        navigation.navigate("Volunteer-Home"); //Go to volunteer home page
+        setAccountID(accountID);
+        navigation.navigate("Admin-Home");
       } else {
-        Alert.alert("ERROR: Failed to sign up!"); //ERROR message if failed to sign up
+        Alert.alert("ERROR: Failed to sign up"); // ERROR message if failed to sign up
       }
     } catch (error) {
-      console.error("ERROR: Could not sign-up", error); //General Error messages.
+      console.error("ERROR: Could not sign-up", error); // General Error messages.
       Alert.alert("ERROR. Something went wrong. Please attempt again.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Question Volunteer</Text>
+      <Text style={styles.title}>Admin</Text>
       {/* Email Text Input */}
       <TextInput
         style={styles.input}
@@ -74,7 +74,7 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
         onChangeText={setPassword}
       />
       <TouchableOpacity style={styles.button} onPress={handleSignUp}>
-        <Text>Sign Up</Text>
+        <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
@@ -92,10 +92,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 20,
   },
-  subTitle: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
   button: {
     backgroundColor: "#9C1212",
     paddingVertical: 10,
@@ -104,9 +100,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 10,
   },
-  orText: {
-    fontSize: 18,
-    marginVertical: 10,
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   input: {
     height: 50,

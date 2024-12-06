@@ -7,6 +7,7 @@ import MyLoginScreen from "./screens/account/login";
 import MyAccountScreen from "./screens/account/account-creation";
 import MyLearnerScreen from "./screens/account/learner";
 import MyVolunteerScreen from "./screens/account/question-volunteer";
+import MyAdminScreen from "./screens/account/admin-creation";
 import MyExploreScreen from "./screens/home/explore";
 import MyQuestionScreen from "./screens/home/question-select";
 import MySettingsScreen from "./screens/home/settings";
@@ -20,6 +21,10 @@ import MyQuestionSolvingScreen from "./screens/home/questions/question-solve";
 import MyQuestionHistoryScreen from "./screens/home/explore-screens/question-history";
 import MyForgotPasswordScreen from "./screens/account/forgot-password";
 import MyBookmaredQuestionsScreen from "./screens/home/explore-screens/bookmarked-questions";
+import MyAccountApprovalScreen from "./screens/admin-screens/account-approval";
+import MyQuestionApprovalScreen from "./screens/admin-screens/question-approval";
+import MyAdminSettingsScreen from "./screens/admin-screens/admin-settings";
+import MyAdminEditScreen from "./screens/admin-screens/admin-edit/admin-edit";
 import {
   RootStackParamList,
   TabParamList,
@@ -29,14 +34,18 @@ import {
   QuestionCreationParamList,
   QuestionSelectionParamList,
   ExploreParamList,
+  AdminTabsParamList,
+  AdminSettingParamList,
 } from "./navigation/types";
 
 const Tab = createBottomTabNavigator<TabParamList>();
 const VolunteerTab = createBottomTabNavigator<VolunteerTabParamList>();
+const AdminTab = createBottomTabNavigator<AdminTabsParamList>();
 const Stack = createStackNavigator<RootStackParamList>();
 const SettingsStack = createStackNavigator<SettingParamList>();
 const VolunteerSettingsStack =
   createStackNavigator<VolunteerSettingParamList>();
+const AdminSettingsStack = createStackNavigator<AdminSettingParamList>();
 const QuestionCreateStack = createStackNavigator<QuestionCreationParamList>();
 const QuestionSelectionStack =
   createStackNavigator<QuestionSelectionParamList>();
@@ -74,6 +83,24 @@ function VolunteerHomeTabs() {
   );
 }
 
+function AdminHomeTabs() {
+  return (
+    <AdminTab.Navigator>
+      <AdminTab.Screen
+        name="Account-Approval"
+        component={MyAccountApprovalScreen}
+        options={{ title: "Account Approval" }}
+      />
+      <AdminTab.Screen
+        name="Question-Approval"
+        component={MyQuestionApprovalScreen}
+        options={{ title: "Question Approval" }}
+      />
+      <AdminTab.Screen name="Admin-Settings" component={AdminSettingsTab} />
+    </AdminTab.Navigator>
+  );
+}
+
 function SettingsTab() {
   return (
     <SettingsStack.Navigator>
@@ -101,6 +128,23 @@ function VolunteerSettingsTab() {
         options={{ title: "Edit Account" }}
       />
     </VolunteerSettingsStack.Navigator>
+  );
+}
+
+function AdminSettingsTab() {
+  return (
+    <AdminSettingsStack.Navigator>
+      <AdminSettingsStack.Screen
+        name="Admin-Settings"
+        component={MyAdminSettingsScreen}
+        options={{ headerShown: false }}
+      />
+      <AdminSettingsStack.Screen
+        name="Admin-Edit"
+        component={MyAdminEditScreen}
+        options={{ title: "Edit Account" }}
+      />
+    </AdminSettingsStack.Navigator>
   );
 }
 
@@ -167,6 +211,7 @@ export default function App() {
           <Stack.Screen name="Account" component={MyAccountScreen} />
           <Stack.Screen name="Learner" component={MyLearnerScreen} />
           <Stack.Screen name="Volunteer" component={MyVolunteerScreen} />
+          <Stack.Screen name="Admin" component={MyAdminScreen} />
 
           {/* Home Tabs */}
           <Stack.Screen
@@ -178,6 +223,12 @@ export default function App() {
           <Stack.Screen
             name="Volunteer-Home"
             component={VolunteerHomeTabs}
+            options={{ headerShown: false }}
+          />
+          {/* Admin Home Tabs */}
+          <Stack.Screen
+            name="Admin-Home"
+            component={AdminHomeTabs}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

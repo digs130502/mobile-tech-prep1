@@ -33,7 +33,7 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
 
     try {
       const response = await fetch(
-        "http://192.168.x.x:3000/api/reset-password",
+        "http://192.168.1.159:3000/api/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

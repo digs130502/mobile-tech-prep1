@@ -31,7 +31,7 @@ export default function VolunteerExplore() {
     }
     try {
       const response = await fetch(
-        `http://192.168.x.x:3000/api/volunteer/stats?accountID=${accountID}`
+        `http://192.168.1.159:3000/api/volunteer/stats?accountID=${accountID}`
       );
       if (!response.ok) {
         Alert.alert("ERROR: Failed to get question volunteer stats"); //Error message if couldn't get QV stats

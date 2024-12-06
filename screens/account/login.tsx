@@ -26,7 +26,7 @@ export default function Login({ navigation }: LoginProps) {
       return;
     }
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/login", {
+      const response = await fetch("http://192.168.1.159:3000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -48,6 +48,8 @@ export default function Login({ navigation }: LoginProps) {
           navigation.navigate("Home"); //Go to the Home screen
         } else if (role === "Question Volunteer") {
           navigation.navigate("Volunteer-Home"); //Go to the Volunteer Home screen
+        } else if (role == "Admin") {
+          navigation.navigate("Admin-Home");
         } else {
           Alert.alert("Login Failed", "Invalid role specified.");
         }

@@ -4,8 +4,10 @@ export type RootStackParamList = {
   Account: undefined;
   Learner: undefined;
   Volunteer: undefined;
+  Admin: undefined;
   Home: undefined; // For the HomeTabs component
   "Volunteer-Home": undefined; // For the VolunteerHomeTabs component
+  "Admin-Home": undefined; // For the AdminHomeTabs component
   "Forgot-Password": undefined;
 };
 
@@ -21,6 +23,12 @@ export type VolunteerTabParamList = {
   "Volunteer-Settings": undefined;
 };
 
+export type AdminTabsParamList = {
+  "Account-Approval": undefined;
+  "Question-Approval": undefined;
+  "Admin-Settings": undefined;
+};
+
 export type SettingParamList = {
   Settings: undefined;
   Edit: undefined;
@@ -30,6 +38,12 @@ export type SettingParamList = {
 export type VolunteerSettingParamList = {
   "Volunteer-Settings": undefined;
   "Volunteer-Edit": undefined;
+  Login: undefined;
+};
+
+export type AdminSettingParamList = {
+  "Admin-Settings": undefined;
+  "Admin-Edit": undefined;
   Login: undefined;
 };
 

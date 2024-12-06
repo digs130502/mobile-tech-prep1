@@ -14,16 +14,32 @@ export default function Account_Creation({ navigation }: LoginProps) {
     navigation.navigate("Volunteer");
   };
 
+  const handleAdmin = () => {
+    navigation.navigate("Admin");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Account Creation</Text>
       <Text style={styles.subTitle}>Are you:</Text>
+
+      {/* Learner Button */}
       <TouchableOpacity style={styles.button} onPress={handleLearner}>
-        <Text>Learner</Text>
+        <Text style={styles.buttonText}>Learner</Text>
       </TouchableOpacity>
+
       <Text style={styles.orText}>Or</Text>
+
+      {/* Volunteer Button */}
       <TouchableOpacity style={styles.button} onPress={handleVolunteer}>
-        <Text>Question Volunteer</Text>
+        <Text style={styles.buttonText}>Question Volunteer</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.orText}>Or</Text>
+
+      {/* Admin Button */}
+      <TouchableOpacity style={styles.button} onPress={handleAdmin}>
+        <Text style={styles.buttonText}>Admin</Text>
       </TouchableOpacity>
     </View>
   );
@@ -53,6 +69,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     margin: 10,
+  },
+  buttonText: {
+    color: "#000", // Changed back to black
+    fontSize: 16,
+    fontWeight: "bold",
   },
   orText: {
     fontSize: 18,

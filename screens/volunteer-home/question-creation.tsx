@@ -36,7 +36,7 @@ export default function QuestionCreation({ navigation }: CreationProp) {
 
     try {
       const response = await fetch(
-        `http://192.168.x.x:3000/api/questions/volunteer?accountID=${accountID}`
+        `http://192.168.1.159:3000/api/questions/volunteer?accountID=${accountID}`
       );
       const data = await response.json(); //get response
 
