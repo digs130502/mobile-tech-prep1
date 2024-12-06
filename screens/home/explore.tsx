@@ -29,7 +29,7 @@ export default function Explore({ navigation }: ExploreProps) {
   const getStats = async () => {
     try {
       const response = await fetch(
-        `http://192.168.1.159:3000/api/user/stats?accountID=${accountID}`
+        `http://192.168.x.x:3000/api/user/stats?accountID=${accountID}`
       );
       if (!response.ok) {
         Alert.alert("ERROR: Failed to get user stats");

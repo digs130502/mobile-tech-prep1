@@ -76,7 +76,7 @@ export default function Create() {
     //Sending the new question to the backend
     try {
       const response = await fetch(
-        "http://192.168.1.159:3000/api/questions/create",
+        "http://192.168.x.x:3000/api/questions/create",
         {
           method: "POST",
           headers: {

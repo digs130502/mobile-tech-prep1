@@ -21,7 +21,7 @@ export default function Learner({ navigation }: LoginProps) {
   // Sign up functionality for Learner
   const handleSignUp = async () => {
     try {
-      const response = await fetch("http://192.168.1.159:3000/api/signup", {
+      const response = await fetch("http://192.168.x.x:3000/api/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

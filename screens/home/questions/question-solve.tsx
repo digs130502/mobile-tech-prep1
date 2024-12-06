@@ -34,7 +34,7 @@ export default function QuestionSolveScreen() {
   const getQuestionInfo = async () => {
     try {
       const response = await fetch(
-        `http://192.168.1.159:3000/api/question/${questionID}`
+        `http://192.168.x.x:3000/api/question/${questionID}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -67,7 +67,7 @@ export default function QuestionSolveScreen() {
   const updateUserHistory = async (isCorrect: boolean) => {
     try {
       const checkResponse = await fetch(
-        `http://192.168.1.159:3000/api/user/history/check`,
+        `http://192.168.x.x:3000/api/user/history/check`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -91,7 +91,7 @@ export default function QuestionSolveScreen() {
       if (checkHistory.exists) {
         //If the user has attempted the question before, then update that question's history info
         const updateResponse = await fetch(
-          "http://192.168.1.159:3000/api/user/history/update",
+          "http://192.168.x.x:3000/api/user/history/update",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -113,7 +113,7 @@ export default function QuestionSolveScreen() {
       } else {
         //This is the user's first attempt at the question, so insert a new question history record
         const insertResponse = await fetch(
-          "http://192.168.1.159:3000/api/user/history/insert",
+          "http://192.168.x.x:3000/api/user/history/insert",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

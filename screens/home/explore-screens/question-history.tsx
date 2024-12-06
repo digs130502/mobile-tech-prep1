@@ -22,7 +22,7 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
   const fetchHistory = async () => {
     try {
       const response = await fetch(
-        `http://192.168.1.159:3000/api/user/history?accountID=${accountID}`
+        `http://192.168.x.x:3000/api/user/history?accountID=${accountID}`
       );
       if (!response.ok) {
         throw new Error("Failed to fetch question history");
