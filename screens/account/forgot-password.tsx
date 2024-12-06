@@ -16,31 +16,72 @@ type ForgotPasswordProps = NativeStackScreenProps<
 >;
 
 export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
-  const [email, setEmail] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState(""); //variable for email
+  const [newPassword, setNewPassword] = useState(""); //variable for new password
+  const [confirmPassword, setConfirmPassword] = useState(""); //variable for the confirm password field
+
+  //Function to check if email format is valid
+  const checkEmailFormat = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //Regex to make sure there is chars followed by an @ symbol and a . followed by some chars
+    return regex.test(email);
+  };
 
   const handleResetPassword = async () => {
+    //If fields are missing
     if (!email || !newPassword || !confirmPassword) {
       Alert.alert("ERROR: Please fill in all fields.");
       return;
     }
+    
+    //Call function and check email format
+    if (!checkEmailFormat(email)) {
+      Alert.alert("ERROR: Invalid email format.");
+      return;
+    }
 
+    //If user entered different passwords
     if (newPassword !== confirmPassword) {
       Alert.alert("ERROR: Passwords do not match.");
       return;
     }
 
     try {
-      const response = await fetch(
-        "http://192.168.x.x:3000/api/reset-password",
-        {
+      //Checks if the email exists in database
+      const emailCheckResponse = await fetch("http://192.168.x.x:3000/api/check/email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            newPassword,
-          }),
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      const emailCheckData = await emailCheckResponse.json(); //Get response
+      //If email does not exist
+      if (!emailCheckData.exists) {
+        Alert.alert("ERROR: Email not found.");
+        return;
+      }
+
+      //Check if the new password is the same as the current password stored in the database
+      const passwordCheckResponse = await fetch("http://192.168.x.x:3000/api/check/new/password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, newPassword }), //send email and newpassword to compare to current password
+        }
+      );
+
+      const passwordCheckData = await passwordCheckResponse.json(); //Get response
+
+      //If the new password entered is not different
+      if (!passwordCheckData.isDifferent) {
+        Alert.alert("ERROR: New password cannot be the same as the old password.");
+        return;
+      }
+
+      //Reset passwrod
+      const response = await fetch("http://192.168.x.x:3000/api/reset/password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, newPassword, }), //send email and newpassword to replace old password
         }
       );
 
@@ -48,15 +89,16 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
         Alert.alert("Success", "Your password has been reset.", [
           {
             text: "OK",
-            onPress: () => navigation.navigate("Login"),
+            onPress: () => navigation.navigate("Login"), //navigate to login page if successful
           },
         ]);
-      } else {
-        Alert.alert("ERROR", "Failed to reset password. Please try again.");
+      } 
+      else { //If could not reset password
+        Alert.alert("ERROR: Failed to reset password. Please try again.");
       }
-    } catch (error) {
+    } catch (error) { //General error messages.
       Alert.alert("ERROR. Something went wrong. Please try again.");
-      console.error("Reset Password Error:", error);
+      console.error("Could not reset password:", error); 
     }
   };
 

@@ -394,9 +394,7 @@ app.get("/api/volunteer/stats", (req, res) => {
       if (err) {
         //Error message if could not retrieve question volunteer stats.
         console.error("ERROR: Could not get question volunteer stats:", err);
-        return res
-          .status(500)
-          .json({ message: "ERROR in getting question volunteer stats" });
+        return res.status(500).json({ message: "ERROR in getting question volunteer stats" });
       }
 
       const totalAttempts = results[0].total_attempts || 0; //saves total attempts, if zero, then set to 0
@@ -409,6 +407,189 @@ app.get("/api/volunteer/stats", (req, res) => {
         completed: correctAttempts,
         accuracy: `${accuracy}%`,
       });
+    }
+  );
+});
+
+//Endpoint to check if email exists in the database
+app.post("/api/check/email", (req, res) => {
+  const { email } = req.body;
+
+  db.query(
+    "SELECT * FROM Account WHERE Email = ?",
+    [email],
+    (err, results) => {
+      if (err) {
+        //Error message if could not retrieve email.
+        console.error("Error checking email:", err);
+        return res.status(500).json({ message: "ERROR: Could not check email" });
+      }
+
+      //If email was not found.
+      if (results.length === 0) {
+        return res.status(404).json({ exists: false });
+      }
+
+      //If email was successfully found.
+      return res.status(200).json({ exists: true });
+    }
+  );
+});
+
+//Endpoint to reset the user's password
+app.post("/api/reset/password", async (req, res) => {
+  const { email, newPassword } = req.body; //Use email and new password
+
+  //Hash the new password before storing it in the datbase
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  db.query(
+    "UPDATE Account SET Pass = ? WHERE Email = ?",
+    [hashedPassword, email],
+    (err, results) => {
+      if (err) { //Error message if could not reset pass.
+        console.error("Error resetting password:", err);
+        return res.status(500).json({ message: "ERROR: Could not reset password" });
+      }
+
+      //If password was not updated (nothing was changed)
+      if (results.affectedRows === 0) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+
+      //If password was updated.
+      return res.status(200).json({ message: "Password updated successfully" });
+    }
+  );
+});
+
+//Endpoint to check if the user's entered current password is the same as the current password in the database
+app.post("/api/check/current/password", async (req, res) => {
+  const { email, currentPassword } = req.body; //Use current password.
+
+  //Get the current hashed password from the database
+  db.query(
+    "SELECT Pass FROM Account WHERE Email = ?",
+    [email],
+    async (err, results) => {
+      if (err) { //Error message if could not get pass.
+        console.error("Error getting user password:", err);
+        return res.status(500).json({ message: "ERROR: Could not get password" });
+      }
+
+      //If email was not found.
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+
+      const currentHashedPassword = results[0].Pass; //Get the password from database
+
+      //Compare the current password with the current password hashed
+      const match = await bcrypt.compare(currentPassword, currentHashedPassword);
+
+      if (match) {
+        return res.status(400).json({
+          isDifferent: false, //The current password is the same as the current database password
+        });
+      }
+
+      //Else the current password is different than the one in the database
+      return res.status(200).json({ isDifferent: true });
+    }
+  );
+});
+
+//Endpoint to check if the user's new password is the same as the current password
+app.post("/api/check/new/password", async (req, res) => {
+  const { email, newPassword } = req.body; //Use new password
+
+  //Get the current hashed password from the database
+  db.query(
+    "SELECT Pass FROM Account WHERE Email = ?",
+    [email],
+    async (err, results) => {
+      if (err) { //Error message if could not get pass.
+        console.error("Error getting user password:", err);
+        return res.status(500).json({ message: "ERROR: Could not get password" });
+      }
+
+      //If email was not found.
+      if (results.length === 0) {
+        return res.status(404).json({ message: "Email not found" });
+      }
+
+      const currentHashedPassword = results[0].Pass; //Get the password from database
+
+      //Compare the new password with the current password hash
+      const match = await bcrypt.compare(newPassword, currentHashedPassword);
+
+      if (match) {
+        return res.status(400).json({
+          isDifferent: false, //The new password is the same as the current password
+        });
+      }
+
+      return res.status(200).json({ isDifferent: true }); //Else the new password is different than the current on in the database
+    }
+  );
+});
+
+//Endpoint to get user's email
+app.get("/api/account/email", (req, res) => {
+  const accountID = req.query.accountID; //Get the accountID
+
+  //Get the user's email from database
+  db.query(
+    "SELECT Email FROM Account WHERE AccountID = ?",
+    [accountID],
+    (err, results) => {
+      if (err) { //Error message if could not get email
+        console.error("Error getting user email:", err);
+        return res.status(500).json({ message: "ERROR: Could not get user email" });
+      }
+
+      //If email was not found.
+      if (results.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      //Else email was found, and return the email back.
+      return res.status(200).json({ email: results[0].Email });
+    }
+  );
+});
+
+//Endpoint to get the user's full question history
+app.get("/api/user/history/details", (req, res) => {
+  const accountID = req.query.accountID; //Get the accountID
+
+  //Get the user's history for all questions
+  db.query(
+    `SELECT q.Question_Text, uqh.Attempts, uqh.Correct_Attempts, uqh.Incorrect_Attempts, uqh.Last_Attempted, uqh.LastAttemptPASSFAIL, q.Difficulty, q.Topic 
+     FROM User_Question_History uqh 
+     JOIN Question q ON uqh.QuestionID = q.QuestionID
+     WHERE uqh.AccountID = ?`,
+    [accountID],
+    (err, results) => {
+      if (err) { //If could not get user question history
+        console.error("Error getting question history:", err);
+        return res.status(500).json({ message: "ERROR: Could not get question history" });
+      }
+
+      //Set response with all the data from the query.
+      const historyData = results.map(item => ({
+        question: item.Question_Text,
+        attempts: item.Attempts,
+        correctAttempts: item.Correct_Attempts,
+        incorrectAttempts: item.Incorrect_Attempts,
+        accuracy: calculateAccuracy(item.Correct_Attempts, item.Attempts), //Use calculateAccuracy function
+        difficulty: item.Difficulty,
+        topic: item.Topic,
+        lastAttempt: item.LastAttemptPASSFAIL ? "Pass" : "Fail", //Either Passed or Failed for last attempt (1 or 0)
+        lastAttemptTime: item.Last_Attempted
+      }));
+
+      res.status(200).json(historyData); //Send all the history data back for displaying
     }
   );
 });

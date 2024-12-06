@@ -16,9 +16,7 @@ type ExploreProps = NativeStackScreenProps<ExploreParamList, "Explore">;
 
 export default function Explore({ navigation }: ExploreProps) {
   const { accountID } = useAppContext(); // Get the logged-in user's accountID
-  const [questionOfTheDay, setQuestionOfTheDay] = useState(
-    "What is the difference between let, const, and var in JavaScript?"
-  );
+  const [questionOfTheDay, setQuestionOfTheDay] = useState("");
 
   const [stats, setStats] = useState({
     attempted: 0,
@@ -67,7 +65,7 @@ export default function Explore({ navigation }: ExploreProps) {
 
       {/* Stats Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Your Stats</Text>
+        <Text style={styles.sectionTitle}>Your Overall Stats</Text>
         <View style={styles.statsContainer}>
           <Text style={styles.statItem}>
             Total Times Attempted: {stats.attempted}

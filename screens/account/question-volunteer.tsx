@@ -18,14 +18,45 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
   const [password, setPassword] = useState(""); //Set up password variable
   const { setAccountID } = useAppContext(); //access account ID
 
+  //Function to check if email format is valid
+  const checkEmailFormat = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //Regex to make sure there is chars followed by an @ symbol and a . followed by some chars
+    return regex.test(email);
+  };
+
   //Sign up functionality for Question Volunteer
   const handleSignUp = async () => {
+    if (!email || !password) {
+      //Check for empty fields
+      Alert.alert("ERROR: Please enter both email and password.");
+      return;
+    }
+
+     //Call function and check email format
+     if (!checkEmailFormat(email)) {
+      Alert.alert("ERROR: Invalid email format.");
+      return;
+    }
+
+    //Checks if the email is already used
+    const emailCheckResponse = await fetch("http://192.168.x.x:3000/api/check/email", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", },
+      body: JSON.stringify({ email, }),
+    });
+
+    const emailCheckData = await emailCheckResponse.json(); //Get response
+  
+    //If email is in database already
+    if (emailCheckData.exists) {
+      Alert.alert("ERROR: Email is already taken"); //Error message if email is taken
+      return;
+    }
+
     try {
       const response = await fetch("http://192.168.x.x:3000/api/signup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json", },
         body: JSON.stringify({
           email,
           password,
