@@ -18,31 +18,28 @@ export default function Explore({ navigation }: ExploreProps) {
   const { accountID } = useAppContext(); // Get the logged-in user's accountID
   const [questionOfTheDay, setQuestionOfTheDay] = useState("");
 
-  // Displays the user's statistics, set to 0 when first logging in
   const [stats, setStats] = useState({
     attempted: 0,
     completed: 0,
     accuracy: "0%",
   });
 
-  // To retrieve the user question history info and calculate user's statistics
   const getStats = async () => {
     try {
       const response = await fetch(
         `http://192.168.x.x:3000/api/user/stats?accountID=${accountID}`
       );
       if (!response.ok) {
-        Alert.alert("ERROR: Failed to get user stats"); // Error message if couldn't get user stats
+        Alert.alert("ERROR: Failed to get user stats");
       }
       const data = await response.json();
-      setStats(data); // Update stats with the retrieved data
+      setStats(data);
     } catch (error) {
-      console.error("ERROR: Could not get user stats:", error); // General error messages
+      console.error("ERROR: Could not get user stats:", error);
       Alert.alert("ERROR. Failed to get user stats. Please attempt again.");
     }
   };
 
-  // Reload stats to current status whenever the user returns to the Explore page
   useFocusEffect(
     React.useCallback(() => {
       getStats();
@@ -92,12 +89,22 @@ export default function Explore({ navigation }: ExploreProps) {
         </Text>
       </View>
 
-      {/* Button to navigate to Question History */}
+      {/* Question History Button */}
       <TouchableOpacity
         style={styles.historyButton}
         onPress={() => navigation.navigate("Question-History")}
       >
         <Text style={styles.historyButtonText}>View Question History</Text>
+      </TouchableOpacity>
+
+      {/* Bookmarked Questions Button */}
+      <TouchableOpacity
+        style={styles.bookmarkedButton}
+        onPress={() => navigation.navigate("Bookmarked-Questions")}
+      >
+        <Text style={styles.bookmarkedButtonText}>
+          View Bookmarked Questions
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -168,6 +175,19 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   historyButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  bookmarkedButton: {
+    width: "100%",
+    backgroundColor: "#FF5722",
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 15,
+  },
+  bookmarkedButtonText: {
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
