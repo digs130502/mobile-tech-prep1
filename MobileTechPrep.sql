@@ -45,7 +45,7 @@ CREATE TABLE User_Question_History (
     FOREIGN KEY (QuestionID) REFERENCES Question(QuestionID)
 );
 
--- Insert two example accounts into the Account table
+-- Insert two example QV accounts into the Account table
 
 INSERT INTO Account (Email, Pass, AccountType)
 VALUES 

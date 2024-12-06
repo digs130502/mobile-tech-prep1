@@ -18,6 +18,12 @@ export default function Login({ navigation }: LoginProps) {
   const [password, setPassword] = useState(""); //Set up password variable
   const { setAccountID } = useAppContext(); //access account ID
 
+  //Function to check if email format is valid
+  const checkEmailFormat = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //Regex to make sure there is chars followed by an @ symbol and a . followed by some chars
+    return regex.test(email);
+  };
+
   //Login functionality
   const handleLogin = async () => {
     if (!email || !password) {
@@ -25,6 +31,13 @@ export default function Login({ navigation }: LoginProps) {
       Alert.alert("ERROR: Please enter both email and password.");
       return;
     }
+
+     //Call function and check email format
+     if (!checkEmailFormat(email)) {
+      Alert.alert("ERROR: Invalid email format.");
+      return;
+    }
+
     try {
       const response = await fetch("http://192.168.x.x:3000/api/login", {
         method: "POST",

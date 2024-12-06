@@ -1,13 +1,20 @@
-import { StyleSheet, View, Text, ScrollView } from "react-native";
+import { StyleSheet, View, Text, ScrollView, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useAppContext } from "../../../AppContext";
+import { useAppContext } from "../../../AppContext"; //For using user's account id.
 import { ExploreParamList } from "../../../navigation/types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { format } from "date-fns";  //Import date-fns for date formatting in question history
 
-type HistoryItem = {
+type HistoryItem = { //Lists all information needed to display to the user.
   question: string;
-  completed: boolean;
   attempts: number;
+  correctAttempts: number;
+  incorrectAttempts: number;
+  accuracy: string;
+  difficulty: string;
+  topic: string;
+  lastAttempt: string;
+  lastAttemptTime: string;
 };
 
 type ExploreProps = NativeStackScreenProps<
@@ -16,26 +23,26 @@ type ExploreProps = NativeStackScreenProps<
 >;
 
 export default function QuestionHistory({ navigation }: ExploreProps) {
-  const { accountID } = useAppContext();
+  const { accountID } = useAppContext(); //To access user's account ID
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
-  const fetchHistory = async () => {
+  //Get all history information from database.
+  const getHistory = async () => {
     try {
-      const response = await fetch(
-        `http://192.168.x.x:3000/api/user/history?accountID=${accountID}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch question history");
+      const response = await fetch(`http://192.168.x.x:3000/api/user/history/details?accountID=${accountID}`);
+
+      if (!response.ok) { //If could not get information
+        Alert.alert("Failed to get question history");
       }
-      const data: HistoryItem[] = await response.json();
-      setHistory(data);
-    } catch (error) {
-      console.error("Error fetching question history:", error);
+      const data: HistoryItem[] = await response.json(); //Get response
+      setHistory(data); //Set the History with all of the data retrieved.
+    } catch (error) { //General error message.
+      console.error("Error getting question history:", error);
     }
   };
 
   useEffect(() => {
-    fetchHistory();
+    getHistory();
   }, []);
 
   return (
@@ -44,8 +51,15 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
       {history.map((item, index) => (
         <View key={index} style={styles.historyItem}>
           <Text style={styles.questionText}>{item.question}</Text>
-          <Text>Status: {item.completed ? "Completed" : "Incomplete"}</Text>
+          <Text style={styles.statisticsHeader}>Question Statistics</Text>
+          <Text>Difficulty: {item.difficulty}</Text>
+          <Text>Topic: {item.topic}</Text>
           <Text>Attempts: {item.attempts}</Text>
+          <Text>Correct Attempts: {item.correctAttempts}</Text>
+          <Text>Incorrect Attempts: {item.incorrectAttempts}</Text>
+          <Text>Accuracy: {item.accuracy}%</Text>
+          <Text>Last Attempt: {item.lastAttempt}</Text>
+          <Text>Last Attempt Time: {format(new Date(item.lastAttemptTime), 'MMMM dd, yyyy, h:mm a')}</Text>
         </View>
       ))}
     </ScrollView>
@@ -75,8 +89,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   questionText: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
     marginBottom: 5,
+  },
+  statisticsHeader: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginVertical: 10,
   },
 });
