@@ -16,12 +16,15 @@ type ExploreProps = NativeStackScreenProps<ExploreParamList, "Explore">;
 
 export default function Explore({ navigation }: ExploreProps) {
   const { accountID } = useAppContext(); // Get the logged-in user's accountID
-  const [questionOfTheDay, setQuestionOfTheDay] = useState("");
+  const [questionOfTheDay, setQuestionOfTheDay] = useState("A different question will be presented every day.");
 
+  //Display stats, set to 0
   const [stats, setStats] = useState({
     attempted: 0,
     completed: 0,
     accuracy: "0%",
+    hintViews: 0,
+    bookmarkedQuestions: 0,
   });
 
   const getStats = async () => {
@@ -50,6 +53,11 @@ export default function Explore({ navigation }: ExploreProps) {
     getStats();
   }, []);
 
+  //Handle QOTD.
+  const handleAttemptNow = () => {
+    Alert.alert("Please come back at a later date to use the QOTD.");
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Welcome Back!</Text>
@@ -58,7 +66,7 @@ export default function Explore({ navigation }: ExploreProps) {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Question of the Day</Text>
         <Text style={styles.questionText}>{questionOfTheDay}</Text>
-        <TouchableOpacity style={styles.attemptButton}>
+        <TouchableOpacity style={styles.attemptButton} onPress={handleAttemptNow}>
           <Text style={styles.attemptButtonText}>Attempt Now</Text>
         </TouchableOpacity>
       </View>
@@ -74,6 +82,12 @@ export default function Explore({ navigation }: ExploreProps) {
             Correct Attempts: {stats.completed}
           </Text>
           <Text style={styles.statItem}>Accuracy: {stats.accuracy}</Text>
+          <Text style={styles.statItem}>
+            Hints Viewed: {stats.hintViews}
+          </Text>
+          <Text style={styles.statItem}>
+            Bookmarked Questions: {stats.bookmarkedQuestions}
+          </Text>
         </View>
       </View>
 

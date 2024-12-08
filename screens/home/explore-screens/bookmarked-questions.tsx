@@ -1,45 +1,57 @@
-import React from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, ScrollView, StyleSheet, Alert } from "react-native";
+import { useAppContext } from "../../../AppContext"; //To access user's account ID
 
 // Define the type for bookmarked questions
 type BookmarkedQuestion = {
-  id: string;
   question: string;
 };
 
 const BookmarkedQuestions = () => {
-  // Example data for bookmarked questions
-  const bookmarkedQuestions: BookmarkedQuestion[] = [
-    { id: "1", question: "What is React Native?" },
-    { id: "2", question: "Explain useState in React." },
-    {
-      id: "3",
-      question: "What is the difference between React and React Native?",
-    },
-  ];
+  const { accountID } = useAppContext(); //To access user's account ID
+  const [bookmarkedQuestions, setBookmarkedQuestions] = useState<BookmarkedQuestion[]>([]);
 
-  const renderQuestion = ({ item }: { item: BookmarkedQuestion }) => (
-    <View style={styles.questionContainer}>
-      <Text style={styles.questionText}>{item.question}</Text>
-    </View>
-  );
+  //Get all bookmarked questions (user's)
+  const getBookmarkedQuestions = async () => {
+    try {
+      const response = await fetch(
+        `http://192.168.x.x:3000/api/user/bookmarked-questions?accountID=${accountID}`
+      );
+
+      if (!response.ok) {
+        //If could not get bookmarked questions.
+        Alert.alert("Failed to get bookmarked questions");
+        return;
+      }
+
+      const data = await response.json(); //Get the response
+      setBookmarkedQuestions(data); //Set the bookmarked questions
+    } catch (error) { //General error message
+      console.error("Error getting bookmarked questions:", error);
+    }
+  };
+
+  useEffect(() => {
+    getBookmarkedQuestions();
+  }, [accountID]);
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <Text style={styles.title}>Bookmarked Questions</Text>
-      <FlatList
-        data={bookmarkedQuestions}
-        renderItem={renderQuestion}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-      />
-    </View>
-  );
+      {bookmarkedQuestions.length === 0 ? ( //If there are no bookmarked questions.
+        <Text style={styles.emptyText}>No bookmarked questions.</Text>) 
+        : (bookmarkedQuestions.map((item, index) => (
+          <View key={index} style={styles.questionContainer}>
+            <Text style={styles.questionText}>{item.question}</Text>
+          </View>
+        ))
+      )}
+    </ScrollView>
+    );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContainer: {
     padding: 20,
     backgroundColor: "#f9f9f9",
   },
@@ -47,9 +59,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
-  },
-  list: {
-    paddingBottom: 20,
   },
   questionContainer: {
     padding: 15,
@@ -65,6 +74,12 @@ const styles = StyleSheet.create({
   questionText: {
     fontSize: 16,
     color: "#333",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#555",
+    textAlign: "center",
+    marginTop: 20,
   },
 });
 

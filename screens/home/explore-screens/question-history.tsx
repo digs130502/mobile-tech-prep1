@@ -16,6 +16,8 @@ type HistoryItem = {
   topic: string;
   lastAttempt: string;
   lastAttemptTime: string;
+  hintViewed: string;
+  bookmarked: string;
 };
 
 type ExploreProps = NativeStackScreenProps<
@@ -46,6 +48,12 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
     }
   };
 
+  //Checks if the date is valid.
+  const isValidDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return !isNaN(date.getTime());
+  };
+
   useEffect(() => {
     getHistory();
   }, []);
@@ -53,7 +61,9 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Question History</Text>
-      {history.map((item, index) => (
+      {history.length === 0 ? ( //If there is no question history to display.
+      <Text style={styles.emptyText}>No question history available.</Text>) 
+      : (history.map((item, index) => (
         <View key={index} style={styles.historyItem}>
           <Text style={styles.questionText}>{item.question}</Text>
           <Text style={styles.statisticsHeader}>Question Statistics</Text>
@@ -63,16 +73,21 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
           <Text>Correct Attempts: {item.correctAttempts}</Text>
           <Text>Incorrect Attempts: {item.incorrectAttempts}</Text>
           <Text>Accuracy: {item.accuracy}%</Text>
-          <Text>Last Attempt: {item.lastAttempt}</Text>
+          <Text>Last Attempt: {item.lastAttempt === "Pass" ? "Pass" : item.lastAttempt === "Fail" ? "Fail" : "N/A"}</Text>
           <Text>
             Last Attempt Time:{" "}
-            {format(new Date(item.lastAttemptTime), "MMMM dd, yyyy, h:mm a")}
+            {item.lastAttemptTime !== "N/A" && isValidDate(item.lastAttemptTime) //Displays attempt time.
+              ? format(new Date(item.lastAttemptTime), "MMMM dd, yyyy, h:mm a")
+              : "N/A"}
           </Text>
+          <Text>Hint Viewed: {item.hintViewed}</Text>
+          <Text>Bookmarked: {item.bookmarked}</Text>
         </View>
-      ))}
+        ))
+      )}
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -104,5 +119,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginVertical: 10,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#555",
+    textAlign: "center",
+    marginTop: 20,
   },
 });

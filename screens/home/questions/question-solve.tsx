@@ -29,6 +29,8 @@ export default function QuestionSolveScreen() {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [hint, setHint] = useState<string>("");
   const [revealedHint, setRevealedHint] = useState(false);
+  const [hintUsed, setHintUsed] = useState<boolean>(false);
+  const [bookmarked, setBookmarked] = useState<boolean>(false);
 
   //To get the details of the question
   const getQuestionInfo = async () => {
@@ -43,7 +45,7 @@ export default function QuestionSolveScreen() {
         setAnswers(shuffle(data.answers)); //Shuffle the answer order
         setDifficulty(data.Difficulty); //Set difficulty
         setTopic(data.Topic); //Set Topic
-        // setHint(data.hint); //Set Hint   <- originally used to obtain hint
+        setHint(data.Hints); //Set Hint
       } else {
         Alert.alert("ERROR: Failed to get question info"); //Error message if couldn't get question info
       }
@@ -62,6 +64,104 @@ export default function QuestionSolveScreen() {
     }
     return array;
   };
+
+  //Function to check if the question is already bookmarked by the user
+  const checkBookmarkStatus = async () => {
+    try {
+      const response = await fetch(
+        "http://192.168.x.x:3000/api/user/check-bookmark",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ accountID, questionID }),
+        }
+      );
+      if (response.ok) {
+        const data = await response.json(); //Get response
+        setBookmarked(data.bookmarked); //Set the bookmark's status
+      } else {
+        Alert.alert("ERROR: Failed to check bookmark status"); //If could not get bookmark status.
+      }
+    } catch (error) { //General error messages
+      console.error("ERROR: Could not check bookmark status:", error);
+      Alert.alert("ERROR: Could not check bookmark status. Please attempt again.");
+    }
+  };
+
+  //Function to toggle the bookmark status from bookmark to unbookmark
+  const toggleBookmark = async () => {
+    try {
+      //Toggle the bookmark status
+      const newBookmarkStatus = bookmarked ? "No" : "Yes";
+      setBookmarked(!bookmarked); //Set the bookmark status
+  
+      //only updating the bookmark field
+      const response = await fetch("http://192.168.x.x:3000/api/user/history/update-bookmark", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountID,
+          questionID,
+          bookmarked: newBookmarkStatus, //Change the bookmark status
+          difficulty,
+          topic,
+        }),
+      });
+  
+      if (!response.ok) {
+        Alert.alert("ERROR: Failed to update bookmark status"); //If could not update status of bookmark
+      }
+  
+      const result = await response.json(); //Get response
+
+      if (result.message === "Bookmark updated") {//If message matches, then its successful
+        console.log("Bookmark updated successfully");
+
+        if (newBookmarkStatus === "Yes") {//Show success message to users.
+          Alert.alert("Success", "Question successfully bookmarked!");
+        } else {
+          Alert.alert("Success", "Question successfully unbookmarked");
+        }
+      }
+    } catch (error) { //General error messages.
+      console.error("ERROR: Could not update bookmark:", error);
+      Alert.alert("ERROR: Could not update bookmark status.");
+    }
+  };
+
+  //Function to handle the hint view
+  const handleViewHint = async () => {
+    try {
+      setRevealedHint(!revealedHint); //Set the hint visibility
+
+      //Update the hint status if it hasn't been used yet
+      if (!hintUsed) {
+        setHintUsed(true); //The hint has been used
+
+        const response = await fetch(
+          "http://192.168.x.x:3000/api/user/history/update-hint",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              accountID,
+              questionID,
+              hintUsed: "Yes", //Hint was used
+              difficulty,
+              topic,
+            }),
+          }
+        );
+
+        if (!response.ok) { //If could not update hint was used.
+          Alert.alert("ERROR: Failed to update hint usage.");
+        }
+      }
+    } catch (error) { //General error messages.
+      console.error("ERROR: Could not update hint usage:", error);
+      Alert.alert("ERROR: Could not update hint usage.");
+    }
+  };  
 
   //To update the user question history for when a user attempts a question (again or for the first time)
   const updateUserHistory = async (isCorrect: boolean) => {
@@ -86,6 +186,8 @@ export default function QuestionSolveScreen() {
         difficulty,
         topic,
         lastAttemptPASSFAIL: isCorrect,
+        hintUsed: hintUsed ? "Yes" : "No",
+        bookmarked: bookmarked ? "Yes" : "No",
       };
 
       if (checkHistory.exists) {
@@ -101,6 +203,8 @@ export default function QuestionSolveScreen() {
               difficulty: difficulty,
               topic: topic,
               lastAttemptPASSFAIL: isCorrect,
+              hintUsed: hintUsed ? "Yes" : "No",
+              bookmarked: bookmarked ? "Yes" : "No",
             }), //Send all info to update that question entry in the user history question database
           }
         );
@@ -149,28 +253,30 @@ export default function QuestionSolveScreen() {
       Alert.alert("Incorrect!", "Try again.");
     }
   };
-  const saveQuestion = () => {
-    /* save question */
-  };
 
   useEffect(() => {
     getQuestionInfo();
+    checkBookmarkStatus();
   }, []);
 
   return (
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
     <View style={styles.container}>
       <View style={styles.questionBox}>
         <ScrollView>
           <Text style={styles.questionText}>{question}</Text>
         </ScrollView>
       </View>
-      {/* if needed, add more buttons here. they will align automatically*/}
+      
       <View style={styles.interactionBar}>
         <TouchableOpacity
-          style={styles.interactionButton}
-          onPress={saveQuestion}
+          style={[
+            styles.interactionButton,
+            bookmarked ? styles.bookmarkedButton : null,
+          ]}
+          onPress={toggleBookmark}
         >
-          💾
+          <Text>{bookmarked ? "Unbookmark" : "Bookmark"}</Text>
         </TouchableOpacity>
       </View>
       <View>
@@ -197,39 +303,48 @@ export default function QuestionSolveScreen() {
       <View style={styles.interactionBar}>
         <TouchableOpacity
           style={styles.interactionButton}
-          onPress={() => {
-            setRevealedHint(!revealedHint);
-          }}
+          onPress={handleViewHint}
         >
-          ?
+          <Text>View Hint</Text>
         </TouchableOpacity>
       </View>
       <View style={revealedHint ? styles.questionBox : styles.hide}>
-        <Text>HINT TEXT GOES HERE{/*{hint}*/}</Text>
+        <Text>{hint || "No hint available"}</Text>
       </View>
     </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 20,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "flex-start",
   },
   interactionBar: {
     display: "flex",
     width: "90%",
     flexDirection: "row-reverse",
+    marginVertical: 10,
   },
   interactionButton: {
-    width: 32,
-    aspectRatio: "1/1",
+    width: 100,
+    height: 50,
     borderRadius: 10,
     backgroundColor: "#D7D7D7",
-    fontSize: 20,
+    fontSize: 16,
+    justifyContent: "center",
+    alignItems: "center",
     textAlign: "center",
+  },
+  bookmarkedButton: {
+    backgroundColor: "gold", // Change color to gold when bookmarked
   },
   questionBox: {
     width: "90%",

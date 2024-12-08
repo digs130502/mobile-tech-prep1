@@ -63,6 +63,24 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
         return;
       }
 
+      //First, check if the account is approved
+      const approvalCheckResponse = await fetch(
+        "http://192.168.x.x:3000/api/check/approval",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
+  
+      const approvalCheckData = await approvalCheckResponse.json(); //Get response
+  
+      //If the account is not approved or rejected do not continue
+      if (approvalCheckResponse.status !== 200) {
+        Alert.alert(approvalCheckData.message); //Show the error message
+        return;
+      }  
+
       //Check if the new password is the same as the current password stored in the database
       const passwordCheckResponse = await fetch(
         "http://192.168.x.x:3000/api/check/new/password",

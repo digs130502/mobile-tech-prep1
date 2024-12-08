@@ -24,7 +24,9 @@ interface Question {
 }
 
 export default function QuestionCreation({ navigation }: CreationProp) {
-  const [questions, setQuestions] = useState<Question[]>([]); //State to hold the questions
+  const [approvedQuestions, setApprovedQuestions] = useState<Question[]>([]); //State to hold the approved questions
+  const [waitingApprovalQuestions, setWaitingApprovalQuestions] = useState<Question[]>([]); //State to hold the waiting for approval questions
+  const [rejectedQuestions, setRejectedQuestions] = useState<Question[]>([]); //State to hold the rejected questions
   const { accountID } = useAppContext(); //accesa account ID
 
   //Function to retrieve the questions created by the current question volunteer
@@ -35,19 +37,35 @@ export default function QuestionCreation({ navigation }: CreationProp) {
     }
 
     try {
-      const response = await fetch(
-        `http://192.168.x.x:3000/api/questions/volunteer?accountID=${accountID}`
+      //Getting approved questions
+      const approvedResponse = await fetch(
+        `http://192.168.x.x:3000/api/questions/volunteer/?accountID=${accountID}`
       );
-      const data = await response.json(); //get response
+      const approvedData = await approvedResponse.json();
 
-      if (response.ok) {
-        setQuestions(data); //Set the questions if successful
-      } else {
-        Alert.alert("ERROR. Failed to get questions."); //Error message if questions could not be retrieved.
+      //Gettiing questions waiting for approval
+      const waitingApprovalResponse = await fetch(
+        `http://192.168.x.x:3000/api/questions/volunteer/waiting-approval?accountID=${accountID}`
+      );
+      const waitingApprovalData = await waitingApprovalResponse.json();
+
+      //Getting rejected questions
+      const rejectedResponse = await fetch(
+        `http://192.168.x.x:3000/api/questions/volunteer/rejected?accountID=${accountID}`
+      );
+      const rejectedData = await rejectedResponse.json();
+
+      //Checking if successful
+      if (approvedResponse.ok && waitingApprovalResponse.ok && rejectedResponse.ok) {
+        setApprovedQuestions(approvedData); //Set the approved questions
+        setWaitingApprovalQuestions(waitingApprovalData); //Set the waiting approval questions
+        setRejectedQuestions(rejectedData); //Set the rejected questions
+      } else { //Error message
+        Alert.alert("ERROR. Failed to get questions.");
       }
-    } catch (error) {
-      console.error("Error retrieving question volunteer's questions:", error); //General error messages
-      Alert.alert("ERROR Something went wrong while fetching questions.");
+    } catch (error) { //General error messages.
+      console.error("Error getting question volunteer's questions:", error);
+      Alert.alert("ERROR Something went wrong while getting questions.");
     }
   }, [accountID]);
 
@@ -60,9 +78,29 @@ export default function QuestionCreation({ navigation }: CreationProp) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Your Questions</Text>
+      <Text style={styles.header}>Your Approved Questions</Text>
       <FlatList
-        data={questions}
+        data={approvedQuestions}
+        keyExtractor={(item) => item.QuestionID.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.questionItem}>
+            <Text style={styles.questionText}>{item.Question_Text}</Text>
+          </TouchableOpacity>
+        )}
+      />
+      <Text style={styles.header}>Your Questions Waiting Approval</Text>
+      <FlatList
+        data={waitingApprovalQuestions}
+        keyExtractor={(item) => item.QuestionID.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.questionItem}>
+            <Text style={styles.questionText}>{item.Question_Text}</Text>
+          </TouchableOpacity>
+        )}
+      />
+      <Text style={styles.header}>Your Rejected Questions</Text>
+      <FlatList
+        data={rejectedQuestions}
         keyExtractor={(item) => item.QuestionID.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.questionItem}>

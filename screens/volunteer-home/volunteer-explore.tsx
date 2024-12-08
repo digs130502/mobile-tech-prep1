@@ -8,18 +8,22 @@ import {
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useAppContext } from "../../AppContext"; //To access question volunteer's accountID
+import { useFocusEffect } from "@react-navigation/native"; //For reloading the page when entering the screen
 
 export default function VolunteerExplore() {
   const { accountID } = useAppContext(); //Get the logged-in question volunteer's accountID
   const [questionOfTheDay, setQuestionOfTheDay] = useState(
-    "What is the difference between let, const, and var in JavaScript?"
+    "A different question will be presented every day."
   );
 
   //Displays the question volunteer's created question statistics, set to be 0 when first logging in
   const [stats, setStats] = useState({
+    questionsCreated: 0,
     attempted: 0,
     completed: 0,
     accuracy: "0%",
+    hintsViewed: 0,
+    bookmarks: 0,
   });
 
   //Gets volunteer's question stats
@@ -47,9 +51,20 @@ export default function VolunteerExplore() {
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      getStats();
+    }, [])
+  );
+
   useEffect(() => {
     getStats();
   }, [accountID]);
+
+  //For handling the QOTD.
+  const handleAttemptNow = () => {
+    Alert.alert("Access Denied", "Please use a learner account to access the QOTD.");
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -59,7 +74,7 @@ export default function VolunteerExplore() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Question of the Day</Text>
         <Text style={styles.questionText}>{questionOfTheDay}</Text>
-        <TouchableOpacity style={styles.attemptButton}>
+        <TouchableOpacity style={styles.attemptButton} onPress={handleAttemptNow}>
           <Text style={styles.attemptButtonText}>Attempt Now</Text>
         </TouchableOpacity>
       </View>
@@ -68,6 +83,7 @@ export default function VolunteerExplore() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Created Question Stats</Text>
         <View style={styles.statsContainer}>
+          <Text style={styles.statItem}>Questions Created: {stats.questionsCreated}</Text>
           <Text style={styles.statItem}>
             Times Attempted: {stats.attempted}
           </Text>
@@ -75,6 +91,8 @@ export default function VolunteerExplore() {
             Correct Attempts: {stats.completed}
           </Text>
           <Text style={styles.statItem}>Accuracy: {stats.accuracy}</Text>
+          <Text style={styles.statItem}>Hints Viewed: {stats.hintsViewed}</Text>
+          <Text style={styles.statItem}>Bookmarks: {stats.bookmarks}</Text>
         </View>
       </View>
 

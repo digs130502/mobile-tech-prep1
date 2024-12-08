@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,46 +7,103 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import { format } from "date-fns"; //Import date-fns for date formatting
 
+//Set account details
 type Account = {
-  id: string;
-  name: string;
-  email: string;
+  AccountID: string;
+  Email: string;
+  AccountType: string;
+  AccountCreationDate: string;
 };
 
 export default function AccountApproval() {
-  // Example list of accounts pending approval
-  const [accounts, setAccounts] = useState<Account[]>([
-    { id: "1", name: "John Doe", email: "john.doe@example.com" },
-    { id: "2", name: "Jane Smith", email: "jane.smith@example.com" },
-  ]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  //Get the pending accounts
+  const getPendingAccounts = async () => {
+    try {
+      const response = await fetch("http://192.168.x.x:3000/api/admin/pending-accounts");
 
-  // Function to handle approval
-  const approveAccount = (id: string) => {
-    setAccounts(accounts.filter((account) => account.id !== id));
-    Alert.alert("Account Approved", `Account ID: ${id} has been approved.`);
+      const data = await response.json(); //Get response
+      setAccounts(data); //Set account data
+
+    } catch (error) { //General error messages
+      console.error("Error getting pending accounts:", error);
+      Alert.alert("ERROR: Could not get pending accounts");
+    }
   };
 
-  // Function to handle rejection
-  const rejectAccount = (id: string) => {
-    setAccounts(accounts.filter((account) => account.id !== id));
-    Alert.alert("Account Rejected", `Account ID: ${id} has been rejected.`);
+  useEffect(() => {
+    getPendingAccounts();
+  }, []);
+
+  //Approve account function
+  const approveAccount = async (accountID: string) => {
+    try {
+      const response = await fetch("http://192.168.x.x:3000/api/admin/approve-account", {
+        method: 'POST',
+        body: JSON.stringify({ accountID, action: 'approve' }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setAccounts(accounts.filter((account) => account.AccountID !== accountID)); //Remove the account if successful
+        Alert.alert("Account Approved", `Account ID: ${accountID} has been approved.`); //Success message
+      } else {
+        Alert.alert("ERROR: Failed to approve the account"); //Error message
+      }
+    } catch (error) { //General error messages.
+      console.error("Error approving account:", error);
+      Alert.alert("ERROR: Could not approve the account");
+    }
+  };
+
+  //Reject account function
+  const rejectAccount = async (accountID: string) => {
+    try {
+      const response = await fetch("http://192.168.x.x:3000/api/admin/approve-account", {
+        method: 'POST',
+        body: JSON.stringify({ accountID, action: 'reject' }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        setAccounts(accounts.filter((account) => account.AccountID !== accountID)); //Remove the account if successful
+        Alert.alert("Account Rejected", `Account ID: ${accountID} has been rejected.`); //Success message
+      } else {
+        Alert.alert("ERROR: Failed to reject the account"); //Error message
+      }
+    } catch (error) { //General error messages.
+      console.error("Error rejecting account:", error);
+      Alert.alert("ERROR: could not reject the account");
+    }
+  };
+
+  //Function to format the account creation date
+  const formatCreationDate = (dateString: string) => {
+    const date = new Date(dateString); //Convert the string to Date
+    return format(date, "MMMM dd, yyyy."); //Format the date
   };
 
   const renderAccount = ({ item }: { item: Account }) => (
     <View style={styles.card}>
-      <Text style={styles.cardText}>Name: {item.name}</Text>
-      <Text style={styles.cardText}>Email: {item.email}</Text>
+      <Text style={styles.cardText}>Email: {item.Email}</Text>
+      <Text style={styles.cardText}>Account Type: {item.AccountType}</Text>
+      <Text style={styles.cardText}>Created on: {formatCreationDate(item.AccountCreationDate)}</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.approveButton}
-          onPress={() => approveAccount(item.id)}
+          onPress={() => approveAccount(item.AccountID)}
         >
           <Text style={styles.buttonText}>Approve</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.rejectButton}
-          onPress={() => rejectAccount(item.id)}
+          onPress={() => rejectAccount(item.AccountID)}
         >
           <Text style={styles.buttonText}>Reject</Text>
         </TouchableOpacity>
@@ -60,7 +117,7 @@ export default function AccountApproval() {
       <FlatList
         data={accounts}
         renderItem={renderAccount}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.AccountID}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No accounts pending approval.</Text>
         }

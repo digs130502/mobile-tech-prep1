@@ -61,7 +61,7 @@ export default function Login({ navigation }: LoginProps) {
           navigation.navigate("Home"); //Go to the Home screen
         } else if (role === "Question Volunteer") {
           navigation.navigate("Volunteer-Home"); //Go to the Volunteer Home screen
-        } else if (role == "Admin") {
+        } else if (role === "Admin") {
           navigation.navigate("Admin-Home");
         } else {
           Alert.alert("Login Failed", "Invalid role specified.");
@@ -72,6 +72,9 @@ export default function Login({ navigation }: LoginProps) {
       } else if (response.status === 401) {
         //If password doesn't match hashed password
         Alert.alert("Login Failed", "Incorrect password");
+      } else if (response.status === 403) {
+        //Checks account approval status
+        Alert.alert("Account Status", data.message);
       } else {
         //General error message
         Alert.alert("Login Failed", "An unknown error occurred");

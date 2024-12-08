@@ -70,10 +70,10 @@ export default function Question_Volunteer({ navigation }: LoginProps) {
       const data = await response.json(); //Wait for response from endpoint
 
       if (response.ok) {
-        Alert.alert("SUCCESS", "Account created successfully!"); //Success message
+        Alert.alert("SUCCESS", "Account created successfully! Your account is awaiting approval."); //Success message
         const { accountID } = data;
         setAccountID(accountID); //Set the account ID
-        navigation.navigate("Volunteer-Home"); //Go to volunteer home page
+        navigation.navigate("Login"); //Go to volunteer home page
       } else {
         Alert.alert("ERROR: Failed to sign up!"); //ERROR message if failed to sign up
       }

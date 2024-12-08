@@ -58,10 +58,13 @@ app.post("/api/signup", async (req, res) => {
         //Encrypt password if the email does not exist
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        //Set approved status based on role
+        const approved = role === "Admin" ? 1 : undefined; //Admin is automatically approved, undefined (null) for QV and learner
+
         //Insert the new account into the Account table
         db.query(
-          "INSERT INTO Account (Email, Pass, AccountType) VALUES (?, ?, ?)",
-          [email, hashedPassword, role],
+          "INSERT INTO Account (Email, Pass, AccountType, Approved) VALUES (?, ?, ?, ?)",
+          [email, hashedPassword, role, approved],
           (err, result) => {
             if (err) {
               return res
@@ -106,6 +109,15 @@ app.post("/api/login", async (req, res) => {
 
         const user = results[0]; //Get the first result
 
+        //Check the approved status
+        if (user.Approved === null) {//If waiting approval
+          return res.status(403).json({ message: "Waiting for account approval" });
+        }
+
+        if (user.Approved === "No" || user.Approved === 0) {//If account was denied
+          return res.status(403).json({ message: "Account approval denied" });
+        }
+
         //Compare hashed password to user's inputted password
         const match = await bcrypt.compare(password, user.Pass);
         if (!match) {
@@ -129,7 +141,7 @@ app.post("/api/login", async (req, res) => {
 //Endpoint for question-select
 app.get("/api/questions", (req, res) => {
   db.query(
-    "SELECT QuestionID, Question_Text, Difficulty, Topic FROM Question",
+    "SELECT QuestionID, Question_Text, Difficulty, Topic FROM Question WHERE Approved = 1",
     (err, results) => {
       if (err) {
         //ERROR: Did not get questions
@@ -141,7 +153,7 @@ app.get("/api/questions", (req, res) => {
   );
 });
 
-//Endpoint to get questions created by the logged in Question Volunteer
+//Endpoint to get approved questions created by the logged in Question Volunteer
 app.get("/api/questions/volunteer", (req, res) => {
   const accountID = req.query.accountID; //Get the accountID
 
@@ -151,7 +163,7 @@ app.get("/api/questions/volunteer", (req, res) => {
   }
 
   db.query(
-    "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ?",
+    "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ? AND Approved = 1",
     [accountID], //Get the questions from creator ID
     (err, results) => {
       if (err) {
@@ -160,6 +172,52 @@ app.get("/api/questions/volunteer", (req, res) => {
       }
 
       res.status(200).json(results); //Send the list of questions
+    }
+  );
+});
+
+//Endpoint to get questions that are waiting for approval
+app.get("/api/questions/volunteer/waiting-approval", (req, res) => {
+  const accountID = req.query.accountID; //Get the accountID
+
+  if (!accountID) {//If no accountID
+    return res.status(400).json({ message: "Account ID is required" });
+  }
+
+  //Get the questions from the creator ID and where the approval status is NULL
+  db.query(
+    "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ? AND Approved IS NULL", 
+    [accountID],
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching volunteer's questions waiting for approval:", err);
+        return res.status(500).json({ message: "Error fetching questions" });
+      }
+
+      res.status(200).json(results); //Send the list of questions waiting for approval
+    }
+  );
+});
+
+//Endpoint to get rejected questions
+app.get("/api/questions/volunteer/rejected", (req, res) => {
+  const accountID = req.query.accountID; //Get the accountID
+
+  if (!accountID) {//If no accountID
+    return res.status(400).json({ message: "Account ID is required" });
+  }
+
+  //Get the questions from the creator ID and where the approval status is 0 (rejected)
+  db.query(
+    "SELECT QuestionID, Question_Text FROM Question WHERE creatorID = ? AND Approved = 0", 
+    [accountID],
+    (err, results) => {
+      if (err) {
+        console.error("Error fetching volunteer's rejected questions:", err);
+        return res.status(500).json({ message: "Error fetching questions" });
+      }
+
+      res.status(200).json(results); //Send the list of rejected questions
     }
   );
 });
@@ -223,7 +281,7 @@ app.post("/api/questions/create", (req, res) => {
 app.get("/api/question/:id", (req, res) => {
   const questionID = req.params.id; //Get the logged-in questionvolunteers's accountID
   db.query(
-    "SELECT QuestionID, Question_Text, DS_Q, Difficulty, Topic FROM Question WHERE QuestionID = ?",
+    "SELECT QuestionID, Question_Text, DS_Q, Difficulty, Topic, Hints FROM Question WHERE QuestionID = ?",
     [questionID],
     (err, results) => {
       if (err) {
@@ -274,13 +332,15 @@ app.post("/api/user/history/check", (req, res) => {
 
 //Endpoint to update the user's history if attempted before
 app.post("/api/user/history/update", (req, res) => {
-  const { accountID, questionID, lastAttemptPASSFAIL } = req.body; //Things to retrieve to update in this endpoint
+  const { accountID, questionID, lastAttemptPASSFAIL, hintUsed, bookmarked } = req.body; //Things to retrieve to update in this endpoint
   db.query(
-    `UPDATE User_Question_History SET Attempts = Attempts + 1, Last_Attempted = NOW(), LastAttemptPASSFAIL = ?, Correct_Attempts = Correct_Attempts + IF(?, 1, 0), Incorrect_Attempts = Incorrect_Attempts + IF(?, 1, 0) WHERE AccountID = ? AND QuestionID = ?`,
+    `UPDATE User_Question_History SET Attempts = Attempts + 1, Last_Attempted = NOW(), LastAttemptPASSFAIL = ?, Correct_Attempts = Correct_Attempts + IF(?, 1, 0), Incorrect_Attempts = Incorrect_Attempts + IF(?, 1, 0), Hint_Used = ?, Bookmarked = ? WHERE AccountID = ? AND QuestionID = ?`,
     [
       lastAttemptPASSFAIL, //For the user's latest attempt (true or false)
       lastAttemptPASSFAIL, //For incrementing correct attempts (increment if it is true)
       !lastAttemptPASSFAIL, //For incrementing incorrect attempts (increments if it is false)
+      hintUsed,
+      bookmarked,
       accountID, //AccountID
       questionID, //QuestionID
     ],
@@ -305,15 +365,15 @@ app.post("/api/user/history/update", (req, res) => {
 
 //Endpoint to insert a question history record for a user (first time)
 app.post("/api/user/history/insert", (req, res) => {
-  const { accountID, questionID, difficulty, topic, lastAttemptPASSFAIL } =
+  const { accountID, questionID, difficulty, topic, lastAttemptPASSFAIL, hintUsed, bookmarked } =
     req.body; //Retrieve info needed to put in
 
   const correctAttempts = lastAttemptPASSFAIL ? 1 : 0; //Set Correct Attempts to correct value based on user's last attempt
   const incorrectAttempts = lastAttemptPASSFAIL ? 0 : 1; //Set Incorrect Attempts to correct value based on user's last attempt
 
   db.query(
-    `INSERT INTO User_Question_History (AccountID, QuestionID, Difficulty, Topic, Attempts, Correct_Attempts, Incorrect_Attempts, Last_Attempted, LastAttemptPASSFAIL)
-  VALUES (?, ?, ?, ?, 1, ?, ?, NOW(), ?)`,
+    `INSERT INTO User_Question_History (AccountID, QuestionID, Difficulty, Topic, Attempts, Correct_Attempts, Incorrect_Attempts, Last_Attempted, LastAttemptPASSFAIL, Hint_Used, Bookmarked)
+  VALUES (?, ?, ?, ?, 1, ?, ?, NOW(), ?, ?, ?)`,
     [
       accountID,
       questionID,
@@ -322,6 +382,8 @@ app.post("/api/user/history/insert", (req, res) => {
       correctAttempts,
       incorrectAttempts,
       lastAttemptPASSFAIL,
+      hintUsed,
+      bookmarked
     ],
     (err, results) => {
       if (err) {
@@ -355,7 +417,8 @@ app.get("/api/user/stats", (req, res) => {
   }
 
   db.query(
-    `SELECT SUM(Attempts) AS total_attempts, SUM(Correct_Attempts) AS correct_attempts FROM User_Question_History WHERE AccountID = ?`,
+    `SELECT SUM(Attempts) AS total_attempts, SUM(Correct_Attempts) AS correct_attempts, SUM(CASE WHEN Hint_Used = 'Yes' THEN 1 ELSE 0 END) AS hint_views,
+      SUM(CASE WHEN Bookmarked = 'Yes' THEN 1 ELSE 0 END) AS bookmarked_questions FROM User_Question_History WHERE AccountID = ?`,
     [accountID],
     (err, results) => {
       if (err) {
@@ -366,6 +429,8 @@ app.get("/api/user/stats", (req, res) => {
 
       const totalAttempts = results[0].total_attempts || 0; //saves total attempts, if zero, then set to 0
       const correctAttempts = results[0].correct_attempts || 0; //saves correct attempts, if zzero, then set to 0
+      const hintViews = results[0].hint_views || 0; //saves num of hint views, if zzero, then set to 0
+      const bookmarkedQuestions = results[0].bookmarked_questions || 0; //saves num of bookmarked questions, if zzero, then set to 0
       const accuracy = calculateAccuracy(correctAttempts, totalAttempts); //calls function to calculate accuracy
 
       //Sends back calculations/stats for displaying
@@ -373,6 +438,8 @@ app.get("/api/user/stats", (req, res) => {
         attempted: totalAttempts,
         completed: correctAttempts,
         accuracy: `${accuracy}%`,
+        hintViews: hintViews,
+        bookmarkedQuestions: bookmarkedQuestions
       });
     }
   );
@@ -388,7 +455,8 @@ app.get("/api/volunteer/stats", (req, res) => {
   }
 
   db.query(
-    "SELECT SUM(UQH.Attempts) AS total_attempts, SUM(UQH.Correct_Attempts) AS correct_attempts FROM User_Question_History UQH JOIN Question Q ON UQH.QuestionID = Q.QuestionID WHERE Q.creatorID = ?",
+    `SELECT SUM(UQH.Attempts) AS total_attempts, SUM(UQH.Correct_Attempts) AS correct_attempts, SUM(CASE WHEN UQH.Hint_Used = 'Yes' THEN 1 ELSE 0 END) AS total_hints_viewed,
+      SUM(CASE WHEN UQH.Bookmarked = 'Yes' THEN 1 ELSE 0 END) AS total_bookmarks, COUNT(DISTINCT Q.QuestionID) AS total_questions_created FROM Question Q LEFT JOIN User_Question_History UQH ON UQH.QuestionID = Q.QuestionID WHERE Q.creatorID = ?`,
     [accountID],
     (err, results) => {
       if (err) {
@@ -402,12 +470,18 @@ app.get("/api/volunteer/stats", (req, res) => {
       const totalAttempts = results[0].total_attempts || 0; //saves total attempts, if zero, then set to 0
       const correctAttempts = results[0].correct_attempts || 0; //saves correct attempts, if zzero, then set to 0
       const accuracy = calculateAccuracy(correctAttempts, totalAttempts); //calls function to calculate accuracy
+      const totalHintsViewed = results[0].total_hints_viewed || 0; //saves num of hint views, if zzero, then set to 0
+      const totalBookmarks = results[0].total_bookmarks || 0; //saves num of bookmarked questions, if zzero, then set to 0
+      const totalQuestionsCreated = results[0].total_questions_created || 0; //saves num of questions created, if zzero, then set to 0
 
       //Sends back calculations/stats for displaying
       res.status(200).json({
+        questionsCreated: totalQuestionsCreated,
         attempted: totalAttempts,
         completed: correctAttempts,
         accuracy: `${accuracy}%`,
+        hintsViewed: totalHintsViewed,
+        bookmarks: totalBookmarks,
       });
     }
   );
@@ -578,7 +652,7 @@ app.get("/api/user/history/details", (req, res) => {
 
   //Get the user's history for all questions
   db.query(
-    `SELECT q.Question_Text, uqh.Attempts, uqh.Correct_Attempts, uqh.Incorrect_Attempts, uqh.Last_Attempted, uqh.LastAttemptPASSFAIL, q.Difficulty, q.Topic 
+    `SELECT q.Question_Text, uqh.Attempts, uqh.Correct_Attempts, uqh.Incorrect_Attempts, uqh.Last_Attempted, uqh.LastAttemptPASSFAIL, q.Difficulty, q.Topic, uqh.Hint_Used, uqh.Bookmarked 
      FROM User_Question_History uqh 
      JOIN Question q ON uqh.QuestionID = q.QuestionID
      WHERE uqh.AccountID = ?`,
@@ -601,13 +675,262 @@ app.get("/api/user/history/details", (req, res) => {
         accuracy: calculateAccuracy(item.Correct_Attempts, item.Attempts), //Use calculateAccuracy function
         difficulty: item.Difficulty,
         topic: item.Topic,
-        lastAttempt: item.LastAttemptPASSFAIL ? "Pass" : "Fail", //Either Passed or Failed for last attempt (1 or 0)
-        lastAttemptTime: item.Last_Attempted,
+        lastAttempt: item.LastAttemptPASSFAIL !== null ? (item.LastAttemptPASSFAIL === 1 ? "Pass" : "Fail") : "N/A", //Send last attempt passed or failed. N/A if not attempted
+        lastAttemptTime: item.Last_Attempted ? item.Last_Attempted : "N/A", //Set "N/A" if no attempt was made
+        hintViewed: item.Hint_Used === "Yes" ? "Yes" : "No", //Checks if the hint was viewed
+        bookmarked: item.Bookmarked === "Yes" ? "Yes" : "No", //Checks if the question was bookmarked
       }));
 
       res.status(200).json(historyData); //Send all the history data back for displaying
     }
   );
+});
+
+//Endpoint to check if a question is bookmarked by the user
+app.post("/api/user/check-bookmark", (req, res) => {
+  const { accountID, questionID } = req.body; //Get accountId and questionID
+
+  db.query(
+    "SELECT Bookmarked FROM User_Question_History WHERE AccountID = ? AND QuestionID = ?",
+    [accountID, questionID],
+    (err, results) => {
+      if (err) {
+        console.error("ERROR: Could not check bookmark status:", err);
+        return res
+          .status(500)
+          .json({ message: "ERROR in checking bookmark status" });
+      }
+
+      if (results.length > 0) {
+        const bookmarked = results[0].Bookmarked === "Yes"; //If "Yes" in database, then it was bookmarked
+        res.json({ bookmarked });
+      } else {
+        res.json({ bookmarked: false }); //If no history is found, not bookmarked
+      }
+    }
+  );
+});
+
+//Endpoint to update a bookmark
+app.post("/api/user/history/update-bookmark", (req, res) => {
+  const { accountID, questionID, bookmarked, difficulty, topic } = req.body;
+
+  //Check if the history record exists user & question first
+  db.query(
+    "SELECT * FROM User_Question_History WHERE AccountID = ? AND QuestionID = ?",
+    [accountID, questionID],
+    (err, results) => {
+      if (err) {
+        console.error("ERROR: Could not check history record:", err);
+        return res.status(500).json({ message: "ERROR in checking history record" });
+      }
+
+      if (results.length > 0) {
+        //If record exists update the bookmark status based on what the bookmark status is
+        db.query(
+          "UPDATE User_Question_History SET Bookmarked = ? WHERE AccountID = ? AND QuestionID = ?",
+          [bookmarked, accountID, questionID],
+          (err, results) => {
+            if (err) {
+              console.error("ERROR: Could not update bookmark status:", err);
+              return res.status(500).json({ message: "ERROR in updating bookmark status" });
+            }
+
+            if (results.affectedRows > 0) { //If rows were changed then bookmark was updated.
+              return res.status(200).json({ message: "Bookmark updated" });
+            } else {
+              return res.status(400).json({ message: "Failed to update bookmark status" });
+            }
+          }
+        );
+      } else {
+        //If no history exists insert a record with the bookmark status, difficulty, and topic values
+        db.query(
+          "INSERT INTO User_Question_History (AccountID, QuestionID, Bookmarked, Difficulty, Topic) VALUES (?, ?, ?, ?, ?)",
+          [accountID, questionID, bookmarked, difficulty, topic],
+          (err, results) => {
+            if (err) {
+              console.error("ERROR: Could not insert new history record:", err);
+              return res.status(500).json({ message: "ERROR in inserting new history record" });
+            }
+
+            return res.status(200).json({ message: "Bookmark updated (new record)" });
+          }
+        );
+      }
+    }
+  );
+});
+
+//Endpoint to update only the Hint_Used status (and create the record if it doesn't exist)
+app.post("/api/user/history/update-hint", (req, res) => {
+  const { accountID, questionID, hintUsed, difficulty, topic } = req.body; // Get accountID, questionID, and hintUsed
+
+  //Check if a question history record exists for this user first
+  db.query(
+    `SELECT * FROM User_Question_History WHERE AccountID = ? AND QuestionID = ?`,
+    [accountID, questionID],
+    (err, results) => {
+      if (err) {
+        console.error("ERROR: Could not check history record:", err);
+        return res.status(500).json({ message: "ERROR in checking history record" });
+      }
+
+      if (results.length > 0) {
+        //If the record exists update the Hint_Used field
+        db.query(
+          `UPDATE User_Question_History SET Hint_Used = ? WHERE AccountID = ? AND QuestionID = ?`,
+          [hintUsed, accountID, questionID],
+          (err, updateResults) => {
+            if (err) {
+              console.error("ERROR: Could not update hint usage:", err);
+              return res.status(500).json({ message: "ERROR in updating hint usage" });
+            }
+
+            //Success message
+            res.status(200).json({ message: "Hint usage updated" });
+          }
+        );
+      } else {
+        //If no record exists then create a new record with hint_used and other values
+        db.query(
+          `INSERT INTO User_Question_History (AccountID, QuestionID, Difficulty, Topic, Hint_Used) VALUES (?, ?, ?, ?, ?)`,
+          [accountID, questionID, difficulty, topic, hintUsed],
+          (err, insertResults) => {
+            if (err) {
+              console.error("ERROR: Could not insert history record:", err);
+              return res.status(500).json({ message: "ERROR in inserting history record" });
+            }
+
+            //Success message
+            res.status(200).json({ message: "History record created and hint usage updated" });
+          }
+        );
+      }
+    }
+  );
+});
+
+//Endpoint to get all questions that are bookmarked for the user
+app.get("/api/user/bookmarked-questions", (req, res) => {
+  const accountID = req.query.accountID; //Get the accountID
+
+  db.query(
+    `SELECT q.Question_Text
+     FROM User_Question_History uqh 
+     JOIN Question q ON uqh.QuestionID = q.QuestionID
+     WHERE uqh.AccountID = ? AND uqh.Bookmarked = 'Yes'`, //Where Bookmarked = "yes"
+    [accountID],
+    (err, results) => {
+      if (err) {
+        console.error("Error getting bookmarked questions:", err);
+        return res.status(500).json({ message: "ERROR: Could not get bookmarked questions" });
+      }
+
+      //Send the list of bookmarked question texts
+      const bookmarkedQuestions = results.map(item => ({
+        question: item.Question_Text,
+      }));
+
+      res.status(200).json(bookmarkedQuestions);
+    }
+  );
+});
+
+//Endpoint to get accounts pending approval
+app.get('/api/admin/pending-accounts', (req, res) => {
+  db.query("SELECT AccountID, Email, AccountType, AccountCreationDate FROM Account WHERE Approved IS NULL", (err, results) => {
+    if (err) {
+      console.error('Error retrieving pending accounts:', err);
+      return res.status(500).json({ message: 'Error retrieving pending accounts' });
+    }
+    res.status(200).json(results); //Send the accounts that are pending approval
+  });
+});
+
+//Endpoint to approve or reject an account
+app.post('/api/admin/approve-account', (req, res) => {
+  const { accountID, action } = req.body; //action = 'approve' or 'reject'
+
+  const updateQuery = action === 'approve'
+    ? 'UPDATE Account SET Approved = TRUE WHERE AccountID = ?' //True if approve
+    : 'UPDATE Account SET Approved = FALSE WHERE AccountID = ?'; //False if reject
+
+  db.query(updateQuery, [accountID], (err, results) => {
+    if (err) {
+      console.error('Error updating account status:', err);
+      return res.status(500).json({ message: 'Error updating account status' });
+    }
+
+    res.status(200).json({ message: `Account ${action}d successfully` });
+  });
+});
+
+//Endpoint to check if the user's account is approved or rejected
+app.post("/api/check/approval", async (req, res) => {
+  const { email } = req.body;
+
+  db.query(
+    "SELECT Approved FROM Account WHERE Email = ?",
+    [email],
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "ERROR" });
+      }
+
+      //If email not in database
+      if (results.length === 0) {
+        return res.status(404).json({ message: "ERROR: Email not found." });
+      }
+
+      const approvalStatus = results[0].Approved; //Get approved field
+
+      //Check the approval status (1 = approved, 0 = rejected, NULL = pending)
+      if (approvalStatus === null) {
+        return res.status(403).json({ message: "Account is awaiting approval." });
+      } else if (approvalStatus === 0) {
+        return res.status(403).json({ message: "Account has been rejected." });
+      }
+
+      //If approved
+      return res.status(200).json({ message: "Account is approved." });
+    }
+  );
+});
+
+//Endpoint to get questions pending approval
+app.get("/api/questions/pending", (req, res) => {
+  db.query(
+    "SELECT QuestionID AS id, Question_Text AS questionText, Topic AS category, Difficulty AS difficulty, DS_Q as answerChoices FROM Question WHERE Approved IS NULL",
+    (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: "ERROR: Database query failed." });
+      }
+
+      res.status(200).json(results); //Send the list of pending questions
+    }
+  );
+});
+
+//Endpoint to approve or reject a question
+app.post("/api/approve/question", (req, res) => {
+  const { questionID, approved } = req.body; //Get questionID, approved
+
+  const query = "UPDATE Question SET Approved = ? WHERE QuestionID = ?";
+  db.query(query, [approved, questionID], (err, result) => {
+    if (err) {
+      console.error("Error updating question:", err);
+      return res.status(500).json({ message: "ERROR: Failed to update question approval." });
+    }
+
+    //Check if any rows changed with the update
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "ERROR: Question not found." });
+    }
+
+    //Success mesage for question being changed
+    res.status(200).json({ message: `Question ID: ${questionID} has been ${approved === 1 ? "approved" : "rejected"}.` });
+  });
 });
 
 //Start Node.js Express server

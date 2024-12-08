@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,43 +8,84 @@ import {
   Alert,
 } from "react-native";
 
+//Define question type
 type Question = {
   id: string;
   questionText: string;
   category: string;
+  difficulty: string;
+  answerChoices: string;
 };
 
 export default function QuestionApproval() {
-  // Example list of questions pending approval
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: "1",
-      questionText: "",
-      category: "",
-    },
-    {
-      id: "2",
-      questionText: "",
-      category: "",
-    },
-  ]);
+  const [questions, setQuestions] = useState<Question[]>([]);
 
-  // Function to handle approval
-  const approveQuestion = (id: string) => {
-    setQuestions(questions.filter((question) => question.id !== id));
-    Alert.alert("Question Approved", `Question ID: ${id} has been approved.`);
+  //Get all the questions that are pending status
+  const getPendingQuestions = async () => {
+    try {
+      const response = await fetch("http://192.168.x.x:3000/api/questions/pending");
+
+      const data = await response.json(); //Get response
+
+      setQuestions(data); //Set questions with data
+    } catch (error) { //Error message.
+      Alert.alert("ERROR: Failed to get questions.");
+      console.error(error);
+    }
   };
 
-  // Function to handle rejection
-  const rejectQuestion = (id: string) => {
-    setQuestions(questions.filter((question) => question.id !== id));
-    Alert.alert("Question Rejected", `Question ID: ${id} has been rejected.`);
+  useEffect(() => {
+    getPendingQuestions();
+  }, []);
+
+  //Function for approving questions
+  const approveQuestion = async (id: string) => {
+    try {
+      const response = await fetch("http://192.168.x.x:3000/api/approve/question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionID: id, approved: 1 }), //1 for approved
+      });
+
+      if (response.ok) {
+        setQuestions(questions.filter((question) => question.id !== id)); //Remove question from list.
+        Alert.alert("Question Approved", `Question ID: ${id} has been approved.`); //Success message
+      } else {
+        Alert.alert("ERROR: Failed to approve the question."); //Error message
+      }
+    } catch (error) {
+      Alert.alert("ERROR: Failed to approve the question."); //Error message
+      console.error(error);
+    }
+  };
+
+  //Function to reject Questions
+  const rejectQuestion = async (id: string) => {
+    try {
+      const response = await fetch("http://192.168.x.x:3000/api/approve/question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionID: id, approved: 0 }), //0 for rejected
+      });
+
+      if (response.ok) {
+        setQuestions(questions.filter((question) => question.id !== id)); //Remove question from list.
+        Alert.alert("Question Rejected", `Question ID: ${id} has been rejected.`); //Success message
+      } else {
+        Alert.alert("ERROR: Failed to reject the question."); //Error message
+      }
+    } catch (error) {
+      Alert.alert("ERROR: Failed to reject the question."); //Error message
+      console.error(error);
+    }
   };
 
   const renderQuestion = ({ item }: { item: Question }) => (
     <View style={styles.card}>
       <Text style={styles.cardText}>Question: {item.questionText}</Text>
-      <Text style={styles.cardText}>Category: {item.category}</Text>
+      <Text style={styles.cardText}>Topic: {item.category}</Text>
+      <Text style={styles.cardText}>Difficulty: {item.difficulty}</Text>
+      <Text style={styles.cardText}>Answer Choices: {item.answerChoices}</Text>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.approveButton}
