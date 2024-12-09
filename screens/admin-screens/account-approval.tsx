@@ -8,6 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { format } from "date-fns"; //Import date-fns for date formatting
+import Constants from 'expo-constants';
 
 //Set account details
 type Account = {
@@ -19,10 +20,12 @@ type Account = {
 
 export default function AccountApproval() {
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
+
   //Get the pending accounts
   const getPendingAccounts = async () => {
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/admin/pending-accounts");
+      const response = await fetch(`${apiBaseUrl}/api/admin/pending-accounts`);
 
       const data = await response.json(); //Get response
       setAccounts(data); //Set account data
@@ -40,7 +43,7 @@ export default function AccountApproval() {
   //Approve account function
   const approveAccount = async (accountID: string) => {
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/admin/approve-account", {
+      const response = await fetch(`${apiBaseUrl}/api/admin/approve-account`, {
         method: 'POST',
         body: JSON.stringify({ accountID, action: 'approve' }),
         headers: {
@@ -63,7 +66,7 @@ export default function AccountApproval() {
   //Reject account function
   const rejectAccount = async (accountID: string) => {
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/admin/approve-account", {
+      const response = await fetch(`${apiBaseUrl}/api/admin/approve-account`, {
         method: 'POST',
         body: JSON.stringify({ accountID, action: 'reject' }),
         headers: {

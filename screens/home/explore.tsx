@@ -11,12 +11,15 @@ import { useAppContext } from "../../AppContext"; // To access user's accountID
 import { useFocusEffect } from "@react-navigation/native"; // For reloading the page when entering the screen
 import { ExploreParamList } from "../../navigation/types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import Constants from 'expo-constants';
 
 type ExploreProps = NativeStackScreenProps<ExploreParamList, "Explore">;
 
 export default function Explore({ navigation }: ExploreProps) {
   const { accountID } = useAppContext(); // Get the logged-in user's accountID
   const [questionOfTheDay, setQuestionOfTheDay] = useState("A different question will be presented every day.");
+
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   //Display stats, set to 0
   const [stats, setStats] = useState({
@@ -30,7 +33,7 @@ export default function Explore({ navigation }: ExploreProps) {
   const getStats = async () => {
     try {
       const response = await fetch(
-        `http://192.168.x.x:3000/api/user/stats?accountID=${accountID}`
+        `${apiBaseUrl}/api/user/stats?accountID=${accountID}`
       );
       if (!response.ok) {
         Alert.alert("ERROR: Failed to get user stats");

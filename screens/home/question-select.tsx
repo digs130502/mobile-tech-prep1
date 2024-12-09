@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { QuestionSelectionParamList } from "../../navigation/types";
+import Constants from 'expo-constants';
 
 type QuestionSelectProp = NativeStackNavigationProp<
   QuestionSelectionParamList,
@@ -34,11 +35,13 @@ export default function Question_Select() {
     null
   );
 
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
+
   const navigation = useNavigation<QuestionSelectProp>();
 
   const fetchQuestions = async () => {
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/questions");
+      const response = await fetch(`${apiBaseUrl}/api/questions`);
       if (!response.ok) {
         throw new Error("Failed to retrieve questions");
       }

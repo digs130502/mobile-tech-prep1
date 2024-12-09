@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, StyleSheet, Alert } from "react-native";
 import { useAppContext } from "../../../AppContext"; //To access user's account ID
+import Constants from 'expo-constants';
 
 // Define the type for bookmarked questions
 type BookmarkedQuestion = {
@@ -10,12 +11,13 @@ type BookmarkedQuestion = {
 const BookmarkedQuestions = () => {
   const { accountID } = useAppContext(); //To access user's account ID
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState<BookmarkedQuestion[]>([]);
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   //Get all bookmarked questions (user's)
   const getBookmarkedQuestions = async () => {
     try {
       const response = await fetch(
-        `http://192.168.x.x:3000/api/user/bookmarked-questions?accountID=${accountID}`
+        `${apiBaseUrl}/api/user/bookmarked-questions?accountID=${accountID}`
       );
 
       if (!response.ok) {

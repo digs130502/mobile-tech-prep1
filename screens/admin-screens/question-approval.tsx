@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
+import Constants from 'expo-constants';
 
 //Define question type
 type Question = {
@@ -20,10 +21,12 @@ type Question = {
 export default function QuestionApproval() {
   const [questions, setQuestions] = useState<Question[]>([]);
 
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
+
   //Get all the questions that are pending status
   const getPendingQuestions = async () => {
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/questions/pending");
+      const response = await fetch(`${apiBaseUrl}/api/questions/pending`);
 
       const data = await response.json(); //Get response
 
@@ -41,7 +44,7 @@ export default function QuestionApproval() {
   //Function for approving questions
   const approveQuestion = async (id: string) => {
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/approve/question", {
+      const response = await fetch(`${apiBaseUrl}/api/approve/question`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionID: id, approved: 1 }), //1 for approved
@@ -62,7 +65,7 @@ export default function QuestionApproval() {
   //Function to reject Questions
   const rejectQuestion = async (id: string) => {
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/approve/question", {
+      const response = await fetch(`${apiBaseUrl}/api/approve/question`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ questionID: id, approved: 0 }), //0 for rejected

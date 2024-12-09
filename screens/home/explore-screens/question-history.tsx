@@ -4,6 +4,7 @@ import { useAppContext } from "../../../AppContext"; //For using user's account 
 import { ExploreParamList } from "../../../navigation/types";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { format } from "date-fns"; //Import date-fns for date formatting in question history
+import Constants from 'expo-constants';
 
 type HistoryItem = {
   //Lists all information needed to display to the user.
@@ -29,11 +30,13 @@ export default function QuestionHistory({ navigation }: ExploreProps) {
   const { accountID } = useAppContext(); //To access user's account ID
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
+
   //Get all history information from database.
   const getHistory = async () => {
     try {
       const response = await fetch(
-        `http://192.168.x.x:3000/api/user/history/details?accountID=${accountID}`
+        `${apiBaseUrl}/api/user/history/details?accountID=${accountID}`
       );
 
       if (!response.ok) {

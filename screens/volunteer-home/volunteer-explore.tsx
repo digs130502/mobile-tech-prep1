@@ -9,12 +9,15 @@ import {
 import React, { useState, useEffect } from "react";
 import { useAppContext } from "../../AppContext"; //To access question volunteer's accountID
 import { useFocusEffect } from "@react-navigation/native"; //For reloading the page when entering the screen
+import Constants from 'expo-constants';
 
 export default function VolunteerExplore() {
   const { accountID } = useAppContext(); //Get the logged-in question volunteer's accountID
   const [questionOfTheDay, setQuestionOfTheDay] = useState(
     "A different question will be presented every day."
   );
+
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   //Displays the question volunteer's created question statistics, set to be 0 when first logging in
   const [stats, setStats] = useState({
@@ -35,7 +38,7 @@ export default function VolunteerExplore() {
     }
     try {
       const response = await fetch(
-        `http://192.168.x.x:3000/api/volunteer/stats?accountID=${accountID}`
+        `${apiBaseUrl}/api/volunteer/stats?accountID=${accountID}`
       );
       if (!response.ok) {
         Alert.alert("ERROR: Failed to get question volunteer stats"); //Error message if couldn't get QV stats

@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express"); //Importing required modules
 const mysql = require("mysql2");
 const bcrypt = require("bcrypt");
@@ -5,12 +6,12 @@ const cors = require("cors");
 
 //Initialize Express server
 const app = express();
-const PORT = 3000; //Specify port
+const PORT = process.env.PORT || 3000; //Specify port
 
 //CORS for allowing requests
 app.use(
   cors({
-    origin: ["http://192.168.x.x:3000", "http://localhost:8081"], //allow requests from web and Android Studios emulator
+    origin: process.env.CORS_ORIGIN.split(','), //allow requests from web and Android Studios emulator
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type"],
   })
@@ -20,10 +21,10 @@ app.use(express.json());
 
 //Initialize connection to MySQL Database
 const db = mysql.createConnection({
-  host: "localhost", //your MySQL host name
-  user: "root", //your MySQL username
-  password: "", //your MySQL password
-  database: "MobileTechPrep", //the name of the Database created
+  host: process.env.DB_HOST, //your MySQL host name
+  user: process.env.DB_USER, //your MySQL username
+  password: process.env.DB_PASSWORD, //your MySQL password
+  database: process.env.DB_NAME, //the name of the Database created
 });
 
 //Connect to MySQL database

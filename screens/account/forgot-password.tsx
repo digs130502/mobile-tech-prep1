@@ -9,6 +9,7 @@ import {
 import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
+import Constants from 'expo-constants';
 
 type ForgotPasswordProps = NativeStackScreenProps<
   RootStackParamList,
@@ -19,6 +20,8 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
   const [email, setEmail] = useState(""); //variable for email
   const [newPassword, setNewPassword] = useState(""); //variable for new password
   const [confirmPassword, setConfirmPassword] = useState(""); //variable for the confirm password field
+
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   //Function to check if email format is valid
   const checkEmailFormat = (email: string) => {
@@ -48,7 +51,7 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
     try {
       //Checks if the email exists in database
       const emailCheckResponse = await fetch(
-        "http://192.168.x.x:3000/api/check/email",
+        `${apiBaseUrl}/api/check/email`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -65,7 +68,7 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
 
       //First, check if the account is approved
       const approvalCheckResponse = await fetch(
-        "http://192.168.x.x:3000/api/check/approval",
+        `${apiBaseUrl}/api/check/approval`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -83,7 +86,7 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
 
       //Check if the new password is the same as the current password stored in the database
       const passwordCheckResponse = await fetch(
-        "http://192.168.x.x:3000/api/check/new/password",
+        `${apiBaseUrl}/api/check/new/password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -103,7 +106,7 @@ export default function ForgotPassword({ navigation }: ForgotPasswordProps) {
 
       //Reset passwrod
       const response = await fetch(
-        "http://192.168.x.x:3000/api/reset/password",
+        `${apiBaseUrl}/api/reset/password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -13,6 +13,7 @@ import {
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useAppContext } from "../../../AppContext"; //For accessing accountID
+import Constants from 'expo-constants';
 
 export default function Create() {
   const { accountID } = useAppContext(); //access account ID
@@ -25,6 +26,8 @@ export default function Create() {
   const [tscQ, setTscQ] = useState<string>("");
   const [dsQ, setDsQ] = useState<string>("");
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
+
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   const [open, setOpen] = useState(false);
   const [difficultyItems, setDifficultyItems] = useState([
@@ -76,7 +79,7 @@ export default function Create() {
     //Sending the new question to the backend
     try {
       const response = await fetch(
-        "http://192.168.x.x:3000/api/questions/create",
+        `${apiBaseUrl}/api/questions/create`,
         {
           method: "POST",
           headers: {

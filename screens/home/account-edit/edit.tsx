@@ -8,12 +8,15 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { useAppContext } from "../../../AppContext"; //To access accountID
+import Constants from 'expo-constants';
 
 export default function Edit() {
   const [email, setEmail] = useState(""); //Email
   const [currentPassword, setCurrentPassword] = useState(""); //Current password variable for verification purposes
   const [newPassword, setNewPassword] = useState(""); //New password variable
   const { accountID } = useAppContext(); //To use current user's ID
+
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   //Save new information/edits to account
   const handleSave = async () => {
@@ -32,7 +35,7 @@ export default function Edit() {
     try {
       //Checks if the email is correct/matches the current user
       const response = await fetch(
-        `http://192.168.x.x:3000/api/account/email?accountID=${accountID}`,
+        `${apiBaseUrl}/api/account/email?accountID=${accountID}`,
         {}
       );
 
@@ -53,7 +56,7 @@ export default function Edit() {
 
       //Checka if the current password is correct.
       const passwordCheckResponse = await fetch(
-        "http://192.168.x.x:3000/api/check/current/password",
+        `${apiBaseUrl}/api/check/current/password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -70,7 +73,7 @@ export default function Edit() {
 
       //Checks if the new password entered by user is not the same as the old password
       const newPasswordCheckResponse = await fetch(
-        "http://192.168.x.x:3000/api/check/new/password",
+        `${apiBaseUrl}/api/check/new/password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,7 +92,7 @@ export default function Edit() {
 
       //Resets the password with the new password if everything is correct so far
       const resetPasswordResponse = await fetch(
-        "http://192.168.x.x:3000/api/reset/password",
+        `${apiBaseUrl}/api/reset/password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

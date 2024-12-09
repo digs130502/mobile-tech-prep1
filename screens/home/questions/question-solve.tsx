@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { useAppContext } from "../../../AppContext"; //To get accountID
+import Constants from 'expo-constants';
 
 type RouteParams = {
   questionID: number;
@@ -18,6 +19,8 @@ export default function QuestionSolveScreen() {
   const route = useRoute();
   const { questionID } = route.params as RouteParams;
   const { accountID } = useAppContext(); //Get accountID for use
+
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   //Set variables for questions, answers, revealing the answer, correct answer, the user's selected answer, difficulty, and topic.
   const [revealed, setRevealed] = useState(false);
@@ -36,7 +39,7 @@ export default function QuestionSolveScreen() {
   const getQuestionInfo = async () => {
     try {
       const response = await fetch(
-        `http://192.168.x.x:3000/api/question/${questionID}`
+        `${apiBaseUrl}/api/question/${questionID}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -69,7 +72,7 @@ export default function QuestionSolveScreen() {
   const checkBookmarkStatus = async () => {
     try {
       const response = await fetch(
-        "http://192.168.x.x:3000/api/user/check-bookmark",
+        `${apiBaseUrl}/api/user/check-bookmark`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -96,7 +99,7 @@ export default function QuestionSolveScreen() {
       setBookmarked(!bookmarked); //Set the bookmark status
   
       //only updating the bookmark field
-      const response = await fetch("http://192.168.x.x:3000/api/user/history/update-bookmark", {
+      const response = await fetch(`${apiBaseUrl}/api/user/history/update-bookmark`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -139,7 +142,7 @@ export default function QuestionSolveScreen() {
         setHintUsed(true); //The hint has been used
 
         const response = await fetch(
-          "http://192.168.x.x:3000/api/user/history/update-hint",
+          `${apiBaseUrl}/api/user/history/update-hint`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -167,7 +170,7 @@ export default function QuestionSolveScreen() {
   const updateUserHistory = async (isCorrect: boolean) => {
     try {
       const checkResponse = await fetch(
-        `http://192.168.x.x:3000/api/user/history/check`,
+        `${apiBaseUrl}/api/user/history/check`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -193,7 +196,7 @@ export default function QuestionSolveScreen() {
       if (checkHistory.exists) {
         //If the user has attempted the question before, then update that question's history info
         const updateResponse = await fetch(
-          "http://192.168.x.x:3000/api/user/history/update",
+          `${apiBaseUrl}/api/user/history/update`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -217,7 +220,7 @@ export default function QuestionSolveScreen() {
       } else {
         //This is the user's first attempt at the question, so insert a new question history record
         const insertResponse = await fetch(
-          "http://192.168.x.x:3000/api/user/history/insert",
+          `${apiBaseUrl}/api/user/history/insert`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },

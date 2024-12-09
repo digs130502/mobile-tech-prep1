@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/types";
 import { useAppContext } from "../../AppContext"; //access account ID
+import Constants from 'expo-constants';
 
 type LoginProps = NativeStackScreenProps<RootStackParamList, "Admin">;
 
@@ -17,6 +18,8 @@ export default function Admin({ navigation }: LoginProps) {
   const [email, setEmail] = useState(""); // Set up email variable
   const [password, setPassword] = useState(""); // Set up password variable
   const { setAccountID } = useAppContext(); //access account ID
+
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
 
   //Function to check if email format is valid
   const checkEmailFormat = (email: string) => {
@@ -40,7 +43,7 @@ export default function Admin({ navigation }: LoginProps) {
 
     //Checks if the email is already used/taken
     const emailCheckResponse = await fetch(
-      "http://192.168.x.x:3000/api/check/email",
+      `${apiBaseUrl}/api/check/email`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,7 +60,7 @@ export default function Admin({ navigation }: LoginProps) {
     }
 
     try {
-      const response = await fetch("http://192.168.x.x:3000/api/signup", {
+      const response = await fetch(`${apiBaseUrl}/api/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

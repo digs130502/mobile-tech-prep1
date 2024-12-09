@@ -11,6 +11,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { QuestionCreationParamList } from "../../navigation/types";
 import { useAppContext } from "../../AppContext"; //For accessing accountID
 import { useFocusEffect } from "@react-navigation/native"; //To fetch questions when navigating back to this page
+import Constants from 'expo-constants';
 
 type CreationProp = NativeStackScreenProps<
   QuestionCreationParamList,
@@ -29,6 +30,8 @@ export default function QuestionCreation({ navigation }: CreationProp) {
   const [rejectedQuestions, setRejectedQuestions] = useState<Question[]>([]); //State to hold the rejected questions
   const { accountID } = useAppContext(); //accesa account ID
 
+  const apiBaseUrl = Constants.expoConfig?.extra?.apiBaseUrl;
+
   //Function to retrieve the questions created by the current question volunteer
   const fetchQuestions = useCallback(async () => {
     if (!accountID) {
@@ -39,19 +42,19 @@ export default function QuestionCreation({ navigation }: CreationProp) {
     try {
       //Getting approved questions
       const approvedResponse = await fetch(
-        `http://192.168.x.x:3000/api/questions/volunteer/?accountID=${accountID}`
+        `${apiBaseUrl}/api/questions/volunteer/?accountID=${accountID}`
       );
       const approvedData = await approvedResponse.json();
 
       //Gettiing questions waiting for approval
       const waitingApprovalResponse = await fetch(
-        `http://192.168.x.x:3000/api/questions/volunteer/waiting-approval?accountID=${accountID}`
+        `${apiBaseUrl}/api/questions/volunteer/waiting-approval?accountID=${accountID}`
       );
       const waitingApprovalData = await waitingApprovalResponse.json();
 
       //Getting rejected questions
       const rejectedResponse = await fetch(
-        `http://192.168.x.x:3000/api/questions/volunteer/rejected?accountID=${accountID}`
+        `${apiBaseUrl}/api/questions/volunteer/rejected?accountID=${accountID}`
       );
       const rejectedData = await rejectedResponse.json();
 
